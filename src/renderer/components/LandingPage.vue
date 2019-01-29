@@ -13,7 +13,8 @@
                v-if="currentIndex === index">
             {{item.content}}
           </div>
-          <div v-else class="item">
+          <div v-else
+               class="item">
             {{item.content}}
           </div>
         </div>
@@ -21,16 +22,15 @@
       </div>
 
       <div class="right-side">
-        <div class="doc">
-          <div class="title">Getting Started</div>
-          <p>
-            electron-vue comes packed with detailed documentation that covers everything from
-            internal configurations, using the project structure, building your application,
-            and so much more.
-          </p>
-          <button @click="open('https://simulatedgreg.gitbooks.io/electron-vue/content/')">Read the Docs</button>
-          <br>
-          <br>
+        <div class="image-scroll">
+          <div class="image-item">
+            <img src="http://www.w3school.com.cn/i/eg_tulip.jpg"
+                 alt="上海鲜花港 - 郁金香" />
+          </div>
+          <div class="image-item">
+            <img src="http://www.w3school.com.cn/i/eg_tulip.jpg"
+                 alt="上海鲜花港 - 郁金香" />
+          </div>
         </div>
       </div>
     </main>
@@ -48,7 +48,7 @@ export default {
       currentIndex: 0
     }
   },
-  // components: { SystemInformation },
+  // components: { SystemInformation ,
   methods: {
     open (link) {
       this.$electron.shell.openExternal(link)
@@ -186,5 +186,11 @@ main > div {
   background-color: transparent;
   width: 500px;
   height: 60px;
+}
+
+.image-scroll {
+  width: 300px;
+  height: 400px;
+  overflow-y: scroll;
 }
 </style>
