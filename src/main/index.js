@@ -23,9 +23,9 @@ function createWindow () {
    * Initial window options
    */
   mainWindow = new BrowserWindow({
-    height: 563,
+    height: 463,
     useContentSize: true,
-    width: 1000
+    width: 800
   })
 
   mainWindow.loadURL(winURL)
@@ -38,8 +38,8 @@ function createWindow () {
     console.log('lo')
     // var filePath = clipboard.read('public.file-url').replace('file://', '')
     // ipcRenderer.sendSync('synchronous-message', 'ping')
-    mainWindow.show()
     mainWindow.webContents.send('synchronous-message', 'ping')
+    mainWindow.show()
   })
 }
 

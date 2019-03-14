@@ -51,6 +51,7 @@ export default {
   mounted () {
     this.$electron.ipcRenderer.on('synchronous-message', (event, args) => {
       console.log('recevie' + args)
+      this.$router.push('confirm')
     })
   },
   // components: { SystemInformation ,

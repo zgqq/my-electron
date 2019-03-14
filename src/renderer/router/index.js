@@ -11,6 +11,11 @@ export default new Router({
       component: require('@/components/LandingPage').default
     },
     {
+      path: '/confirm',
+      name: 'confirm-page',
+      component: require('@/components/ConfirmPage').default
+    },
+    {
       path: '*',
       redirect: '/'
     }
