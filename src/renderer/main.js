@@ -9,6 +9,10 @@ if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
 Vue.http = Vue.prototype.$http = axios
 Vue.config.productionTip = false
 
+// var e = require('electron')
+// e.globalShortcut.register('cmd+option+l', function () {
+//   console.log('nice')
+// })
 /* eslint-disable no-new */
 new Vue({
   components: { App },
