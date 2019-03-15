@@ -18,6 +18,12 @@
       //   var filePath = this.$electron.clipboard.read('public.file-url').replace('file://', '')
       //   console.log('filePath ' + filePath)
       // })
+
+      this.$electron.ipcRenderer.on('synchronous-message', (event, args) => {
+        console.log('recevie' + args)
+        this.$router.push('confirm')
+        // this.$router.push({ name: 'confirm-page', params: { : '123' }})
+      })
     }
   }
 </script>

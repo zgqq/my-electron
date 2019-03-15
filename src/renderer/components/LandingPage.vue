@@ -24,7 +24,7 @@
       <div class="right-side">
         <div class="image-scroll">
           <div class="image-item">
-          <img src="http://www.w3school.com.cn/i/eg_tulip.jpg"
+          <img src="file:///Users/zhanguiqi/Pictures/9f0d61159534abb6b39068b13edf8a29.gif"
                  alt="上海鲜花港 - 郁金香" />
           </div>
           <div class="image-item">
@@ -49,10 +49,6 @@ export default {
     }
   },
   mounted () {
-    this.$electron.ipcRenderer.on('synchronous-message', (event, args) => {
-      console.log('recevie' + args)
-      this.$router.push('confirm')
-    })
   },
   // components: { SystemInformation ,
   methods: {

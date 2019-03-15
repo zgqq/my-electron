@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, BrowserWindow, globalShortcut } from 'electron'
+import { app, BrowserWindow, globalShortcut, clipboard } from 'electron'
 
 /**
  * Set `__static` path to static files in production
@@ -25,7 +25,10 @@ function createWindow () {
   mainWindow = new BrowserWindow({
     height: 463,
     useContentSize: true,
-    width: 800
+    width: 800,
+    webPreferences: {
+      webSecurity: false
+    }
   })
 
   mainWindow.loadURL(winURL)
@@ -36,9 +39,8 @@ function createWindow () {
 
   globalShortcut.register('cmd+option+l', function () {
     console.log('lo')
-    // var filePath = clipboard.read('public.file-url').replace('file://', '')
     // ipcRenderer.sendSync('synchronous-message', 'ping')
-    mainWindow.webContents.send('synchronous-message', 'ping')
+    mainWindow.webContents.send('synchronous-message', 'confirm')
     mainWindow.show()
   })
 }
