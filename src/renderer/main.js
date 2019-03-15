@@ -14,6 +14,7 @@ Vue.config.productionTip = false
 //   console.log('nice')
 // })
 /* eslint-disable no-new */
+store.dispatch('nice')
 new Vue({
   components: { App },
   router,

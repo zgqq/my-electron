@@ -1,6 +1,7 @@
 'use strict'
 
-import { app, BrowserWindow, globalShortcut, clipboard } from 'electron'
+import { app, BrowserWindow, globalShortcut } from 'electron'
+import '../renderer/store'
 
 /**
  * Set `__static` path to static files in production
