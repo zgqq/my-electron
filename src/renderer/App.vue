@@ -10,16 +10,21 @@ export default {
   created () {
     console.log('created app')
     this.$electron.ipcRenderer.on('synchronous-message', (event, args) => {
-      console.log('recevie' + args)
+      console.log('recevie  ' + args)
       // this.$store.commit('CHANGE_IMG_URL')
+      var filePath = this.$electron.clipboard.read('public.file-url')
+      var localFile = filePath.replace('file://', '')
+      this.$store.dispatch('ConfirmPage/changeImgUrl', { imgUrl: filePath, localFile: localFile })
       this.$router.push('confirm')
+      event.sender.send('page-loaded', 'ok')
+      // this.$electron.ipcRenderer.sendSync('loaded', 'ping')
       // this.$router.push({ name: 'confirm-page', params: { : '123' }})
     })
   },
   mounted () {
     var filePath = this.$electron.clipboard.read('public.file-url').replace('file://', '')
     console.log('filePath ' + filePath)
-    this.$store.dispatch('nice')
+    // this.$store.dispatch('nice')
     // this.$electron.globalShortcut.register('cmd+option+l', function () {
     //   var filePath = this.$electron.clipboard.read('public.file-url').replace('file://', '')
     //   console.log('filePath ' + filePath)

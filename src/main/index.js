@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, BrowserWindow, globalShortcut } from 'electron'
+import { app, BrowserWindow, globalShortcut, ipcMain } from 'electron'
 import '../renderer/store'
 
 /**
@@ -28,6 +28,8 @@ function createWindow () {
     useContentSize: true,
     width: 800,
     webPreferences: {
+      pageVisibility: true,
+      backgroundThrottling: false,
       webSecurity: false
     }
   })
@@ -42,7 +44,13 @@ function createWindow () {
     console.log('lo')
     // ipcRenderer.sendSync('synchronous-message', 'ping')
     mainWindow.webContents.send('synchronous-message', 'confirm')
-    mainWindow.show()
+    setTimeout(() => {
+      mainWindow.show()
+    }, 100)
+    ipcMain.on('page-loaded', (event, args) => {
+      console.log('page-loaded')
+      // mainWindow.show()
+    })
   })
 }
 

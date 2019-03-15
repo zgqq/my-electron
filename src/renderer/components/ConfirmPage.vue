@@ -1,11 +1,15 @@
 <template>
   <div>
     <!-- <div class="title">Information</div> -->
-    <div class="title">{{imgUrl}}1{{main}}</div>
+    <div class="title">local: {{localFile}}</div>
     <input id="input"
            value=""
            @keydown="handleKeyDown" />
 
+    <div class="image-item">
+      <img v-bind:src="imgUrl"
+           alt="上海鲜花港 - 郁金香" />
+    </div>
   </div>
 </template>
 
@@ -14,16 +18,17 @@ export default {
   name: 'confirm-page',
   mounted () {
     console.log('mounted confirm page')
-    this.$store.dispatch('ConfirmPage/changeImgUrl',
-      { imgUrl: 'https://baidu.com' })
   },
   beforeUpdate () {
     console.log('before update confirm page')
   },
+  updated () {
+    console.log('updated confirm')
+  },
   beforeRouteEnter (to, from, next) {
     console.log('entered')
     next(vm => {
-      vm.$store.dispatch('changeImgUrl', { imgUrl: 'https://baidu.com' })
+      // vm.$store.dispatch('ConfirmPage/changeImgUrl', { imgUrl: 'https://baidu.com' })
     })
   },
   computed: {
@@ -32,22 +37,48 @@ export default {
     },
     main: function () {
       return this.$store.state.Counter.main
+    },
+    localFile: function () {
+      return this.$store.state.ConfirmPage.localFile
     }
   },
   methods: {
-    handleKeyDown: function () {
+    handleKeyDown: function (event) {
       console.log('oooo')
-      this.$store.dispatch('changeImgUrlsssss')
-    }
-  },
-  data () {
-    return {
-      electron: process.versions.electron,
-      name: this.$route.name,
-      node: process.versions.node,
-      path: this.$route.path,
-      platform: require('os').platform(),
-      vue: require('vue/package.json').version
+      // this.$store.dispatch('ConfirmPage/changeImgUrl', { imgUrl: 'inputed' })
+      console.log(event.key)
+      var key = event.key
+      if (key === 'Enter') {
+        var value = event.target.value
+        console.log('Handle enter key' + value)
+        // const fsPromises = this.$electron.require('fs').promises
+
+        var { remote } = require('electron')
+
+        var path = require('path')
+        var ext = path.extname(this.localFile)
+
+        var electronFs = remote.require('fs')
+        console.log('local file ' + this.localFile)
+        electronFs.copyFile(this.localFile, '/Users/zhanguiqi/Dropbox/Personal/Emoticon/' + value + ext, (err) => {
+          if (err) throw err
+          console.log('source.txt was copied to destination.txt')
+        })
+        //   electronFs.fsPromises.copyFile(this.localFile, '/tmp/ok')
+        //     .then(() => console.log('source.txt was copied to destination.txt'))
+        //     .catch(() => console.log('The file could not be copied'))
+        // }
+      }
+    },
+    data () {
+      return {
+        electron: process.versions.electron,
+        name: this.$route.name,
+        node: process.versions.node,
+        path: this.$route.path,
+        platform: require('os').platform(),
+        vue: require('vue/package.json').version
+      }
     }
   }
 }
