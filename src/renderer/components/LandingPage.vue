@@ -24,7 +24,7 @@
       <div class="right-side">
         <div class="image-scroll">
           <div class="image-item">
-          <img src="file:///Users/zhanguiqi/Pictures/9f0d61159534abb6b39068b13edf8a29.gif"
+            <img src="file:///Users/zhanguiqi/Pictures/9f0d61159534abb6b39068b13edf8a29.gif"
                  alt="上海鲜花港 - 郁金香" />
           </div>
           <div class="image-item">
@@ -67,6 +67,9 @@ export default {
         var value = event.target.value
         console.log('Handle enter key' + value)
         this.items.push({ content: '' + value })
+        var FuzzyMatching = require('fuzzy-matching')
+        var fm = new FuzzyMatching(['tough', 'thought', 'through', 'Café'])
+        console.log(fm.get(value))
       }
       if (key === 'ArrowDown') {
         this.currentIndex++

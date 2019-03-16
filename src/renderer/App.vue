@@ -10,15 +10,19 @@ export default {
   created () {
     console.log('created app')
     this.$electron.ipcRenderer.on('synchronous-message', (event, args) => {
-      console.log('recevie  ' + args)
-      // this.$store.commit('CHANGE_IMG_URL')
-      var filePath = this.$electron.clipboard.read('public.file-url')
-      var localFile = filePath.replace('file://', '')
-      this.$store.dispatch('ConfirmPage/changeImgUrl', { imgUrl: filePath, localFile: localFile })
-      this.$router.push('confirm')
-      event.sender.send('page-loaded', 'ok')
-      // this.$electron.ipcRenderer.sendSync('loaded', 'ping')
-      // this.$router.push({ name: 'confirm-page', params: { : '123' }})
+      if (args === 'confirm') {
+        console.log('recevie  ' + args)
+        // this.$store.commit('CHANGE_IMG_URL')
+        var filePath = this.$electron.clipboard.read('public.file-url')
+        var localFile = filePath.replace('file://', '')
+        this.$store.dispatch('ConfirmPage/changeImgUrl', { imgUrl: filePath, localFile: localFile })
+        this.$router.push('confirm')
+        event.sender.send('page-loaded', 'ok')
+        // this.$electron.ipcRenderer.sendSync('loaded', 'ping')
+        // this.$router.push({ name: 'confirm-page', params: { : '123' }})
+      } else if (args === 'search') {
+        this.$router.push('search-emotion')
+      }
     })
   },
   mounted () {

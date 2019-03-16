@@ -16,6 +16,11 @@ export default new Router({
       component: require('@/components/ConfirmPage').default
     },
     {
+      path: '/search-emotion',
+      name: 'search-emotion',
+      component: require('@/components/SearchEmotion').default
+    },
+    {
       path: '*',
       redirect: '/'
     }

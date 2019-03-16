@@ -60,9 +60,16 @@ export default {
 
         var electronFs = remote.require('fs')
         console.log('local file ' + this.localFile)
-        electronFs.copyFile(this.localFile, '/Users/zhanguiqi/Dropbox/Personal/Emoticon/' + value + ext, (err) => {
+        var newFile = '/Users/zhanguiqi/Dropbox/Personal/Emoticon/' + value + ext
+        electronFs.copyFile(this.localFile, newFile, (err) => {
           if (err) throw err
           console.log('source.txt was copied to destination.txt')
+        })
+
+        const storage = require('electron-json-storage')
+        storage.setDataPath('/Users/zhanguiqi/Dropbox/Personal/Emoticon/data')
+        storage.set(value, { file: newFile }, function (error) {
+          if (error) throw error
         })
         //   electronFs.fsPromises.copyFile(this.localFile, '/tmp/ok')
         //     .then(() => console.log('source.txt was copied to destination.txt'))

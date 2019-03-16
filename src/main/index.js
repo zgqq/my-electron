@@ -40,10 +40,23 @@ function createWindow () {
     mainWindow = null
   })
 
-  globalShortcut.register('cmd+option+l', function () {
+  globalShortcut.register('cmd+ctrl+l', function () {
     console.log('lo')
     // ipcRenderer.sendSync('synchronous-message', 'ping')
     mainWindow.webContents.send('synchronous-message', 'confirm')
+    setTimeout(() => {
+      mainWindow.show()
+    }, 100)
+    ipcMain.on('page-loaded', (event, args) => {
+      console.log('page-loaded')
+      // mainWindow.show()
+    })
+  })
+
+  globalShortcut.register('cmd+ctrl+e', function () {
+    console.log('lo')
+    // ipcRenderer.sendSync('synchronous-message', 'ping')
+    mainWindow.webContents.send('synchronous-message', 'search')
     setTimeout(() => {
       mainWindow.show()
     }, 100)
