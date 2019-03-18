@@ -19,7 +19,15 @@ const winURL =
     ? `http://localhost:9080`
     : `file://${__dirname}/index.html`
 
-function createWindow () {
+function getOrCreateMainWindow () {
+  if (mainWindow) {
+    return mainWindow
+  }
+  newWindow()
+  return mainWindow
+}
+
+function newWindow () {
   /**
    * Initial window options
    */
@@ -39,10 +47,14 @@ function createWindow () {
   mainWindow.on('closed', () => {
     mainWindow = null
   })
+}
 
+function createWindow () {
+  mainWindow = getOrCreateMainWindow()
   globalShortcut.register('cmd+ctrl+l', function () {
     console.log('lo')
     // ipcRenderer.sendSync('synchronous-message', 'ping')
+    mainWindow = getOrCreateMainWindow()
     mainWindow.webContents.send('synchronous-message', 'confirm')
     setTimeout(() => {
       mainWindow.show()
@@ -56,6 +68,7 @@ function createWindow () {
   globalShortcut.register('cmd+ctrl+e', function () {
     console.log('lo')
     // ipcRenderer.sendSync('synchronous-message', 'ping')
+    mainWindow = getOrCreateMainWindow()
     mainWindow.webContents.send('synchronous-message', 'search')
     setTimeout(() => {
       mainWindow.show()

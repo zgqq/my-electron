@@ -44,12 +44,37 @@ export default {
       console.log('oooo')
       // this.$store.dispatch('ConfirmPage/changeImgUrl', { imgUrl: 'inputed' })
       console.log(event.key)
-      // var key = event.key
+      const key = event.key
       const value = event.target.value
       console.log('Handle enter key' + value)
       const storage = require('electron-json-storage')
       storage.setDataPath('/Users/zhanguiqi/Dropbox/Personal/Emoticon/data')
       const el = this
+
+      if (key === 'Enter') {
+        var path = require('path')
+        var ext = path.extname(this.filePath)
+        if (ext === '.gif') {
+          this.$electron.clipboard.writeBuffer(
+            'NSFilenamesPboardType',
+            Buffer.from(`
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+    <plist version="1.0">
+      <array>
+        <string>` + this.filePath + `</string>
+      </array>
+    </plist>
+  `)
+          )
+        } else {
+          const e = this.$electron
+          e.clipboard.writeImage(e.nativeImage.createFromPath(this.filePath))
+        }
+
+        console.log('copy file')
+      }
+
       storage.keys(function (error, keys) {
         if (error) throw error
         // var FuzzyMatching = require('fuzzy-matching')
@@ -69,6 +94,7 @@ export default {
             if (error) throw error
             console.log(data)
             el.imgFile = 'file://' + data.file
+            el.filePath = data.file
           })
         } else {
           el.imgFile = ''
