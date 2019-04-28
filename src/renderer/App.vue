@@ -37,6 +37,28 @@ export default {
 
             querystring.stringify({ image: imageData }))
             .then(function (response) {
+              const pinyin = require('pinyin')
+              console.log(pinyin('中心,,,_ 为', {
+                style: pinyin.STYLE_NORMAL
+              }))
+              const result = response.data.words_result
+              if (result !== undefined && result.length > 0) {
+                // array empty or does not exist
+                const word = result[0].words.replace(/[ |,]+/, '_')
+                const pinyins = pinyin(word, {
+                  style: pinyin.STYLE_NORMAL
+                })
+                var pinyinStr = ''
+                for (var i = 0; i < pinyins.length; i++) {
+                  const element = pinyins[i]
+                  pinyinStr += element
+                  if (i !== pinyins.length - 1) {
+                    pinyinStr += '_'
+                  }
+                }
+
+                console.log('pinyinStr:' + pinyinStr)
+              }
               console.log(response)
             })
             .catch(function (error) {
