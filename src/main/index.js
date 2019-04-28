@@ -55,12 +55,13 @@ function createWindow () {
     console.log('lo')
     // ipcRenderer.sendSync('synchronous-message', 'ping')
     mainWindow = getOrCreateMainWindow()
+    console.log('receive shortcut')
     mainWindow.webContents.send('synchronous-message', 'confirm')
     setTimeout(() => {
       mainWindow.show()
     }, 100)
     ipcMain.on('page-loaded', (event, args) => {
-      console.log('page-loaded')
+      console.log('l-page-loaded')
       // mainWindow.show()
     })
   })

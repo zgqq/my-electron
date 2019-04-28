@@ -9,12 +9,40 @@ export default {
   name: 'my-electron',
   created () {
     console.log('created app')
-    this.$electron.ipcRenderer.on('synchronous-message', (event, args) => {
+    const channel = 'synchronous-message'
+    this.$electron.ipcRenderer.removeAllListeners(channel)
+    this.$electron.ipcRenderer.on(channel, (event, args) => {
       if (args === 'confirm') {
         console.log('recevie  ' + args)
         // this.$store.commit('CHANGE_IMG_URL')
         var filePath = this.$electron.clipboard.read('public.file-url')
         var localFile = filePath.replace('file://', '')
+        if (localFile !== '') {
+          var path = require('path')
+          console.log('file ' + localFile)
+          var ext = path.extname(localFile)
+          if (ext !== 'gif') {
+            console.log('not gif')
+          } else {
+            console.log('lt is a gif file')
+          }
+        } else {
+          const image = this.$electron.clipboard.readImage()
+          const imageData = image.toDataURL().replace(/^data:([A-Za-z-+/]+);base64,/, '')
+          // console.log('imageData:' + imageData)
+          const axios = require('axios')
+          const querystring = require('querystring')
+          axios.post('https://aip.baidubce.com/rest/2.0/ocr/v1/general?access_token=24.5981c80f9e65ad0886b5acff6cd87f67.2592000.1558855207.282335-16118581',
+            // querystring.stringify({ image: querystring.escape(imageData) }))
+
+            querystring.stringify({ image: imageData }))
+            .then(function (response) {
+              console.log(response)
+            })
+            .catch(function (error) {
+              console.log(error)
+            })
+        }
         this.$store.dispatch('ConfirmPage/changeImgUrl', { imgUrl: filePath, localFile: localFile })
         this.$router.push('confirm')
         event.sender.send('page-loaded', 'ok')

@@ -69,7 +69,8 @@ export default {
           )
         } else {
           const e = this.$electron
-          e.clipboard.writeImage(e.nativeImage.createFromPath(this.filePath))
+          const image = this.$electron.nativeImage.createFromPath(this.filePath).resize({ witdh: 120, height: 120 }, 'best')
+          e.clipboard.writeImage(image)
         }
 
         console.log('copy file')
