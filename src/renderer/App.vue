@@ -56,8 +56,13 @@ export default {
                     pinyinStr += '_'
                   }
                 }
-
                 console.log('pinyinStr:' + pinyinStr)
+                const png = image.toPNG()
+                require('fs').writeFile('/Users/zhanguiqi/Dropbox/Images/personal/emotion/' + pinyinStr + '-' + word + '.png'
+                  ,
+                  png, function (err) {
+                    if (err) throw err; else console.log('Write of', filePath, 'was successful')
+                  })
               }
               console.log(response)
             })
