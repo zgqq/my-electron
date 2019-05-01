@@ -12,8 +12,8 @@
            :key="index2"
            class="image-item">
         <img v-bind:src="item.imgFile"
-             height="200"
-             width="200"
+             height="190"
+             width="190"
              alt="哈哈哈" />
       </div>
     </div>
@@ -108,72 +108,93 @@ export default {
       //   }
       // })
 
-      const testFolder = '/Users/zhanguiqi/Dropbox/Images/personal/emotion/'
-      const fs = require('fs')
-      fs.readdir(testFolder, (err, files) => {
-        if (err) throw err
-        files.forEach(file => {
-          console.log(file)
-        })
-        const keys = files
-        var fuzzy = require('fuzzy')
-        var results = fuzzy.filter(value, keys)
-        var matches = results.map(function (el) { return el.string })
-        console.log(matches)
-        if (matches.length > 0) {
-          // do something
-          // storage.get(matches[0], function (error, data) {
-          //   if (error) throw error
-          // console.log(data)
+      const rowCount = 4
+      if (event.metaKey && key === 'g') {
+        console.log('local no Pictures')
+        const axios = require('axios')
+        const queryUrl = 'https://image.baidu.com/search/index?tn=baiduimage&ipn=r&ct=201326592&cl=2&lm=-1&st=-1&fm=result&fr=' +
+          '&sf=1&fmq=1556729374609_R&pv=&ic=&nc=1&z=&hd=&latest=&copyright=&se=1&showtab=0&fb=0&width=&height=&face=0' +
+          '&istype=2&ie=utf-8&ctd=1556729374611%5E00_617X698&sid=&word=' + value + ' 表情包'
+        // sougou 'https://pic.sogou.com/pics?query=' + value + ' 表情包&di=2&_asf=pic.sogou.com&w=05009900&sut=9393&sst0=1556705686429'
 
-          const rowCount = 2
+        axios.get(queryUrl)
+          .then(function (response) {
+            const patt = /"thumbURL":"(.+?)"/g
+            var r = patt.exec(response.data)
+            var i = 0
+            var images = []
+            var imageIndex = 0
+            var itemIndex = 0
+            const imageItems = []
 
-          var images = []
-          var imageIndex = 0
-          var itemIndex = 0
-          const imageItems = []
-
-          imageItems[itemIndex] = images
-          for (let index = 0; index < matches.length; index++) {
-            if (index % rowCount === 0 && index > 0) {
-              images = []
-              imageIndex = 0
-              imageItems[++itemIndex] = images
-            }
-            const file = matches[index]
-            // el.imgFile = 'file://' + testFolder + file
-            // el.filePath = file
-            images[imageIndex++] = {
-              imgFile: 'file://' + testFolder + file,
-              filePath: file
-            }
-          }
-          el.imageTable = imageItems
-          console.log(imageItems)
-          // const file = matches[0]
-          // })
-        } else {
-          console.log('local no Pictures')
-          const axios = require('axios')
-          axios.get('https://pic.sogou.com/pics?query=我一点都不喜欢你 表情包&di=2&_asf=pic.sogou.com&w=05009900&sut=9393&sst0=1556705686429'
-          )
-            .then(function (response) {
-              const patt = /"thumbUrl":"(.+?)"/g
-              var r = patt.exec(response.data)
-              var i = 0
-              while (r) {
-                console.log(r[1])
-                i++
-                if (i > 3) break
-                r = patt.exec(response.data)
+            imageItems[itemIndex] = images
+            while (r) {
+              if (i % rowCount === 0 && i > 0) {
+                images = []
+                imageIndex = 0
+                imageItems[++itemIndex] = images
               }
-              console.log(response)
-            })
-            .catch(function (error) {
-              console.log(error)
-            })
-        }
-      })
+              images[imageIndex++] =
+                { imgFile: r[1],
+                  filePath: '' }
+              console.log('image url ' + r[1])
+              i++
+              if (i >= rowCount * 2) break
+              r = patt.exec(response.data)
+            }
+            el.imageTable = imageItems
+            console.log(imageItems)
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
+      } else {
+        const testFolder = '/Users/zhanguiqi/Dropbox/Images/personal/emotion/'
+        const fs = require('fs')
+        fs.readdir(testFolder, (err, files) => {
+          if (err) throw err
+          files.forEach(file => {
+            console.log(file)
+          })
+          const keys = files
+          var fuzzy = require('fuzzy')
+          var results = fuzzy.filter(value, keys)
+          var matches = results.map(function (el) { return el.string })
+          console.log(matches)
+          if (matches.length > 0) {
+            // do something
+            // storage.get(matches[0], function (error, data) {
+            //   if (error) throw error
+            // console.log(data)
+
+            var images = []
+            var imageIndex = 0
+            var itemIndex = 0
+            const imageItems = []
+
+            imageItems[itemIndex] = images
+            for (let index = 0; index < matches.length; index++) {
+              if (index % rowCount === 0 && index > 0) {
+                images = []
+                imageIndex = 0
+                imageItems[++itemIndex] = images
+              }
+              const file = matches[index]
+              // el.imgFile = 'file://' + testFolder + file
+              // el.filePath = file
+              images[imageIndex++] = {
+                imgFile: 'file://' + testFolder + file,
+                filePath: file
+              }
+            }
+            el.imageTable = imageItems
+            console.log(imageItems)
+            // const file = matches[0]
+            // })
+          } else {
+          }
+        })
+      }
       // console.log('kkkkkkk')
       // console.log('this electron' + this.$electron)
       // this.imgFile = 'file:///Users/zhanguiqi/Pictures/9f0d61159534abb6b39068b13edf8a29.gif'
