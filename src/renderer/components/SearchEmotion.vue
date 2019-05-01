@@ -8,6 +8,8 @@
 
     <div class="image-item">
       <img v-bind:src="imgFile"
+           height="200"
+           width="200"
            alt="哈哈哈" />
     </div>
   </div>
@@ -75,32 +77,58 @@ export default {
 
         console.log('copy file')
       }
+      // storage.keys(function (error, keys) {
+      //   if (error) throw error
+      //   // var FuzzyMatching = require('fuzzy-matching')
+      //   // var fm = new FuzzyMatching(keys)
+      //   // var matched = fm.get(value)
 
-      storage.keys(function (error, keys) {
-        if (error) throw error
-        // var FuzzyMatching = require('fuzzy-matching')
-        // var fm = new FuzzyMatching(keys)
-        // var matched = fm.get(value)
+      //   // console.log(matched)
+      //   // console.log(el)
+      //   // el.imgFile = matched.value
+      //   var fuzzy = require('fuzzy')
+      //   var results = fuzzy.filter(value, keys)
+      //   var matches = results.map(function (el) { return el.string })
+      //   console.log(matches)
+      //   if (matches.length > 0) {
+      //     // do something
+      //     storage.get(matches[0], function (error, data) {
+      //       if (error) throw error
+      //       console.log(data)
+      //       el.imgFile = 'file://' + data.file
+      //       el.filePath = data.file
+      //     })
+      //   } else {
+      //     el.imgFile = ''
+      //   }
+      // })
 
-        // console.log(matched)
-        // console.log(el)
-        // el.imgFile = matched.value
+      const testFolder = '/Users/zhanguiqi/Dropbox/Images/personal/emotion/'
+      const fs = require('fs')
+      fs.readdir(testFolder, (err, files) => {
+        if (err) throw err
+        files.forEach(file => {
+          console.log(file)
+        })
+        const keys = files
         var fuzzy = require('fuzzy')
         var results = fuzzy.filter(value, keys)
         var matches = results.map(function (el) { return el.string })
         console.log(matches)
         if (matches.length > 0) {
           // do something
-          storage.get(matches[0], function (error, data) {
-            if (error) throw error
-            console.log(data)
-            el.imgFile = 'file://' + data.file
-            el.filePath = data.file
-          })
+          // storage.get(matches[0], function (error, data) {
+          //   if (error) throw error
+          // console.log(data)
+          const file = matches[0]
+          el.imgFile = 'file://' + testFolder + file
+          el.filePath = file
+          // })
         } else {
           el.imgFile = ''
         }
       })
+
       // console.log('kkkkkkk')
       // console.log('this electron' + this.$electron)
       // this.imgFile = 'file:///Users/zhanguiqi/Pictures/9f0d61159534abb6b39068b13edf8a29.gif'

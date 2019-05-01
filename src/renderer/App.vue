@@ -12,6 +12,7 @@ export default {
     const channel = 'synchronous-message'
     this.$electron.ipcRenderer.removeAllListeners(channel)
     this.$electron.ipcRenderer.on(channel, (event, args) => {
+      const vue = this
       if (args === 'confirm') {
         console.log('recevie  ' + args)
         // this.$store.commit('CHANGE_IMG_URL')
@@ -58,11 +59,15 @@ export default {
                 }
                 console.log('pinyinStr:' + pinyinStr)
                 const png = image.toPNG()
-                require('fs').writeFile('/Users/zhanguiqi/Dropbox/Images/personal/emotion/' + pinyinStr + '-' + word + '.png'
-                  ,
+                const fs = require('fs')
+                localFile = '/Users/zhanguiqi/Dropbox/Images/personal/emotion/' + pinyinStr + '-' + word + '.png'
+                filePath = 'file://' + localFile
+                fs.writeFile(
+                  localFile,
                   png, function (err) {
                     if (err) throw err; else console.log('Write of', filePath, 'was successful')
                   })
+                vue.$store.dispatch('ConfirmPage/changeImgUrl', { imgUrl: filePath, localFile: localFile })
               }
               console.log(response)
             })
@@ -70,7 +75,7 @@ export default {
               console.log(error)
             })
         }
-        this.$store.dispatch('ConfirmPage/changeImgUrl', { imgUrl: filePath, localFile: localFile })
+        vue.$store.dispatch('ConfirmPage/changeImgUrl', { imgUrl: filePath, localFile: localFile })
         this.$router.push('confirm')
         event.sender.send('page-loaded', 'ok')
         // this.$electron.ipcRenderer.sendSync('loaded', 'ping')
