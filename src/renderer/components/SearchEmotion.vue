@@ -153,10 +153,27 @@ export default {
           // const file = matches[0]
           // })
         } else {
-          el.imgFile = ''
+          console.log('local no Pictures')
+          const axios = require('axios')
+          axios.get('https://pic.sogou.com/pics?query=我一点都不喜欢你 表情包&di=2&_asf=pic.sogou.com&w=05009900&sut=9393&sst0=1556705686429'
+          )
+            .then(function (response) {
+              const patt = /"thumbUrl":"(.+?)"/g
+              var r = patt.exec(response.data)
+              var i = 0
+              while (r) {
+                console.log(r[1])
+                i++
+                if (i > 3) break
+                r = patt.exec(response.data)
+              }
+              console.log(response)
+            })
+            .catch(function (error) {
+              console.log(error)
+            })
         }
       })
-
       // console.log('kkkkkkk')
       // console.log('this electron' + this.$electron)
       // this.imgFile = 'file:///Users/zhanguiqi/Pictures/9f0d61159534abb6b39068b13edf8a29.gif'
