@@ -5,12 +5,17 @@
     <input id="input"
            value=""
            @keydown="handleKeyDown" />
-
-    <div class="image-item">
-      <img v-bind:src="imgFile"
-           height="200"
-           width="200"
-           alt="哈哈哈" />
+    <div v-for="(items, index) in imageTable"
+         :key="index"
+         class="image-list">
+      <div v-for="(item, index2) in items"
+           :key="index2"
+           class="image-item">
+        <img v-bind:src="item.imgFile"
+             height="200"
+             width="200"
+             alt="哈哈哈" />
+      </div>
     </div>
   </div>
 </template>
@@ -120,9 +125,32 @@ export default {
           // storage.get(matches[0], function (error, data) {
           //   if (error) throw error
           // console.log(data)
-          const file = matches[0]
-          el.imgFile = 'file://' + testFolder + file
-          el.filePath = file
+
+          const rowCount = 2
+
+          var images = []
+          var imageIndex = 0
+          var itemIndex = 0
+          const imageItems = []
+
+          imageItems[itemIndex] = images
+          for (let index = 0; index < matches.length; index++) {
+            if (index % rowCount === 0 && index > 0) {
+              images = []
+              imageIndex = 0
+              imageItems[++itemIndex] = images
+            }
+            const file = matches[index]
+            // el.imgFile = 'file://' + testFolder + file
+            // el.filePath = file
+            images[imageIndex++] = {
+              imgFile: 'file://' + testFolder + file,
+              filePath: file
+            }
+          }
+          el.imageTable = imageItems
+          console.log(imageItems)
+          // const file = matches[0]
           // })
         } else {
           el.imgFile = ''
@@ -140,7 +168,8 @@ export default {
   },
   data () {
     return {
-      imgFile: 'file:///Users/zhanguiqi/Dropbox/Personal/Emoticon/haohao.gif'
+      imgFile: 'file:///Users/zhanguiqi/Dropbox/Personal/Emoticon/haohao.gif',
+      imageTable: []
     }
   }
 }
@@ -172,5 +201,9 @@ export default {
 .item .value {
   color: #35495e;
   font-weight: bold;
+}
+
+.image-item {
+  display: inline;
 }
 </style>
