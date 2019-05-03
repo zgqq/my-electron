@@ -55,11 +55,12 @@ export default {
       const value = event.target.value
       console.log('Handle enter key' + value)
       const storage = require('electron-json-storage')
-      storage.setDataPath('/Users/zhanguiqi/Dropbox/Personal/Emoticon/data')
+      const dataPath = '/Users/zhanguiqi/Dropbox/Images/personal/emotion/data'
+      storage.setDataPath(dataPath)
       const el = this
+      const path = require('path')
 
       if (key === 'Enter') {
-        var path = require('path')
         var ext = path.extname(this.filePath)
         if (ext === '.gif') {
           this.$electron.clipboard.writeBuffer(
@@ -82,6 +83,13 @@ export default {
 
         console.log('copy file')
       }
+      storage.getAll(function (error, data) {
+        if (error) throw error
+
+        const str = JSON.stringify(data, null, 4)
+        console.log('data ' + str)
+      })
+
       // storage.keys(function (error, keys) {
       //   if (error) throw error
       //   // var FuzzyMatching = require('fuzzy-matching')
@@ -108,7 +116,121 @@ export default {
       //   }
       // })
 
+      const testFolder = '/Users/zhanguiqi/Dropbox/Images/personal/emotion/'
       const rowCount = 4
+      const numKey = (parseInt(key) || -1)
+      const electron = this.$electron
+      if (event.metaKey && numKey >= 0 && numKey <= 9) {
+        // (numKey / rowCount)
+        console.log('select image')
+        var quotient = Math.floor(numKey / rowCount)
+        var remainder = (numKey - 1) % rowCount
+        var obj = this.imageTable[quotient][remainder]
+        const str = JSON.stringify(obj, null, 4)
+        if (obj.imgFile.startsWith('http')) {
+          console.log('image' + str)
+          var fs = require('fs')
+          var request = require('request')
+          var download = function (uri, filename, callback) {
+            request.head(uri, function (err, res, body) {
+              if (err) throw err
+              console.log('content-type:', res.headers['content-type'])
+              console.log('content-length:', res.headers['content-length'])
+              request(uri).pipe(fs.createWriteStream(filename)).on('close', callback)
+            })
+          }
+
+          const axios = require('axios')
+          const querystring = require('querystring')
+          axios.post('https://aip.baidubce.com/rest/2.0/ocr/v1/general?access_token=24.5981c80f9e65ad0886b5acff6cd87f67.2592000.1558855207.282335-16118581',
+            querystring.stringify({ url: obj.imgFile })
+          )
+            .then(function (response) {
+              const pinyin = require('pinyin')
+              console.log(pinyin('中心,,,_ 为', {
+                style: pinyin.STYLE_NORMAL
+              }))
+              const result = response.data.words_result
+              if (result !== undefined && result.length > 0) {
+                // array empty or does not exist
+                var pinyinStr = ''
+                var words = ''
+                for (let index = 0; index < result.length; index++) {
+                  const line = result[index]
+                  const word = line.words.replace(/[ |,]+/, '_')
+                  const pinyins = pinyin(word, {
+                    style: pinyin.STYLE_NORMAL
+                  })
+                  words += word
+                  for (var i = 0; i < pinyins.length; i++) {
+                    const element = pinyins[i]
+                    pinyinStr += element
+                    if (i !== pinyins.length - 1) {
+                      pinyinStr += '_'
+                    }
+                  }
+                }
+
+                console.log('pinyinStr:' + pinyinStr)
+                var crypto = require('crypto')
+                const md5 = function (text) {
+                  return crypto.createHash('md5').update(text).digest('hex')
+                }
+                var ocr = pinyinStr + '-' + words
+                var imgId = md5(ocr)
+                var filename = imgId + '.png'
+                var localFile = '/Users/zhanguiqi/Dropbox/Images/personal/emotion/' + filename
+
+                download(obj.imgFile, localFile, function () {
+                  console.log('done')
+                  const image = electron.nativeImage.createFromPath(localFile)
+                  console.log('filepath ' + localFile)
+                  electron.clipboard.writeImage(image)
+                })
+                var storeValue = { text: ocr,
+                  searched: [value],
+                  utime: Date.now(),
+                  filename:
+                    filename }
+
+                storage.set(imgId, storeValue, function (error) {
+                  if (error) throw error
+                })
+              }
+              console.log(response)
+            })
+            .catch(function (error) {
+              console.log(error)
+            })
+        } else {
+          ext = path.extname(obj.imgFile)
+          if (ext === '.gif') {
+            this.$electron.clipboard.writeBuffer(
+              'NSFilenamesPboardType',
+              Buffer.from(`
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+    <plist version="1.0">
+      <array>
+        <string>` + this.filePath + `</string>
+      </array>
+    </plist>
+  `)
+            )
+          } else {
+            const e = this.$electron
+            // const filepath = testFolder + obj.filename
+            const filepath = obj.imgFile.replace('file://', '')
+            const image = this.$electron.nativeImage.createFromPath(filepath)
+            console.log('filepath ' + filepath)
+            e.clipboard.writeImage(image)
+          }
+
+          console.log('copy file ' + ext)
+        }
+        return
+      }
+
       if (event.metaKey && key === 'g') {
         console.log('local no Pictures')
         const axios = require('axios')
@@ -134,9 +256,7 @@ export default {
                 imageIndex = 0
                 imageItems[++itemIndex] = images
               }
-              images[imageIndex++] =
-                { imgFile: r[1],
-                  filePath: '' }
+              images[imageIndex++] = { imgFile: r[1], filePath: '' }
               console.log('image url ' + r[1])
               i++
               if (i >= rowCount * 2) break
@@ -148,24 +268,24 @@ export default {
           .catch(function (error) {
             console.log(error)
           })
-      } else {
-        const testFolder = '/Users/zhanguiqi/Dropbox/Images/personal/emotion/'
-        const fs = require('fs')
-        fs.readdir(testFolder, (err, files) => {
-          if (err) throw err
-          files.forEach(file => {
-            console.log(file)
-          })
-          const keys = files
+      } else if (key.length === 1) {
+        storage.getAll(function (error, data) {
+          if (error) throw error
           var fuzzy = require('fuzzy')
-          var results = fuzzy.filter(value, keys)
+          var prepareMatchs = []
+          var i = 0
+          for (const key in data) {
+            if (data.hasOwnProperty(key)) {
+              const obj = data[key]
+              prepareMatchs[i++] = key + obj.text + obj.searched.join()
+            }
+          }
+
+          var results = fuzzy.filter(value, prepareMatchs)
           var matches = results.map(function (el) { return el.string })
-          console.log(matches)
+          console.log('matched ' + matches)
           if (matches.length > 0) {
             // do something
-            // storage.get(matches[0], function (error, data) {
-            //   if (error) throw error
-            // console.log(data)
 
             var images = []
             var imageIndex = 0
@@ -182,19 +302,78 @@ export default {
               const file = matches[index]
               // el.imgFile = 'file://' + testFolder + file
               // el.filePath = file
-              images[imageIndex++] = {
-                imgFile: 'file://' + testFolder + file,
-                filePath: file
-              }
+
+              storage.get(file.substring(0, 32), function (error, data) {
+                if (error) throw error
+                console.log('jsondata' + data)
+                const filename = data.filename
+                images[imageIndex++] = {
+                  imgFile: 'file://' + testFolder + filename,
+                  filePath: file
+                }
+                el.imageTable = imageItems
+              })
             }
-            el.imageTable = imageItems
-            console.log(imageItems)
-            // const file = matches[0]
+            console.log('imageitem' + imageItems)
+            // storage.get(matches[0], function (error, data) {
+            //   if (error) throw error
+            //   console.log(data)
+            //   el.imgFile = 'file://' + data.file
+            //   el.filePath = data.file
             // })
           } else {
+            el.imageTable = []
           }
+
+          console.log(data)
         })
       }
+      // const fs = require('fs')
+      // fs.readdir(testFolder, (err, files) => {
+      //   if (err) throw err
+      //   files.forEach(file => {
+      //     console.log(file)
+      //   })
+      //   const keys = files
+      //   var fuzzy = require('fuzzy')
+      //   var results = fuzzy.filter(value, keys)
+      //   var matches = results.map(function (el) { return el.string })
+      //   console.log(matches)
+      //   if (matches.length > 0) {
+      //     // do something
+      //     // storage.get(matches[0], function (error, data) {
+      //     //   if (error) throw error
+      //     // console.log(data)
+
+      //     var images = []
+      //     var imageIndex = 0
+      //     var itemIndex = 0
+      //     const imageItems = []
+
+      //     imageItems[itemIndex] = images
+      //     for (let index = 0; index < matches.length; index++) {
+      //       if (index % rowCount === 0 && index > 0) {
+      //         images = []
+      //         imageIndex = 0
+      //         imageItems[++itemIndex] = images
+      //       }
+      //       const file = matches[index]
+      //       // el.imgFile = 'file://' + testFolder + file
+      //       // el.filePath = file
+      //       images[imageIndex++] = {
+      //         imgFile: 'file://' + testFolder + file,
+      //         filePath: file
+      //       }
+      //     }
+      //     el.imageTable = imageItems
+      //     console.log(imageItems)
+      //     // const file = matches[0]
+      //     // })
+      //   } else {
+
+      //   }
+      // })
+
       // console.log('kkkkkkk')
       // console.log('this electron' + this.$electron)
       // this.imgFile = 'file:///Users/zhanguiqi/Pictures/9f0d61159534abb6b39068b13edf8a29.gif'
