@@ -1,10 +1,11 @@
 <template>
   <div>
     <!-- <div class="title">Information</div> -->
-    <div class="title">local: {{localFile}}</div>
+    <!-- <div class="title">local: {{localFile}}</div> -->
     <input id="input"
            value=""
-           @keydown="handleKeyDown" />
+           @keydown="handleKeyDown"
+           v-on:input="handleChange" />
     <div v-for="(items, index) in imageTable"
          :key="index"
          class="image-list">
@@ -47,6 +48,88 @@ export default {
     }
   },
   methods: {
+    handleChange: function (event) {
+      const value = event.target.value
+      console.log('Handle  change value' + value)
+      const storage = require('electron-json-storage')
+      const dataPath = '/Users/zhanguiqi/Dropbox/Images/personal/emotion/data'
+      const el = this
+      const testFolder = '/Users/zhanguiqi/Dropbox/Images/personal/emotion/'
+      const rowCount = 4
+
+      storage.setDataPath(dataPath)
+      storage.getAll(function (error, data) {
+        if (error) throw error
+        var fuzzy = require('fuzzy')
+        var prepareMatchs = []
+        var i = 0
+        for (const key in data) {
+          if (data.hasOwnProperty(key)) {
+            const obj = data[key]
+            prepareMatchs[i++] = key + obj.text + obj.searched.join()
+          }
+        }
+
+        var results = []
+        if (value !== '') {
+          results = fuzzy.filter(value, prepareMatchs)
+        }
+        var matches = results.map(function (el) { return el.string })
+        console.log('matched ' + matches)
+        if (matches.length > 0) {
+          // do something
+
+          var keys = []
+          for (let index = 0; index < matches.length; index++) {
+            const file = matches[index]
+            keys[index] = file.substring(0, 32)
+          }
+
+          storage.getMany(keys, function (error, data) {
+            if (error) throw error
+
+            var images = []
+            var imageIndex = 0
+            var itemIndex = 0
+            const imageItems = []
+
+            imageItems[itemIndex] = images
+            var index = 0
+            for (const key in data) {
+              if (data.hasOwnProperty(key)) {
+                const obj = data[key]
+
+                if (index % rowCount === 0 && index > 0) {
+                  images = []
+                  imageIndex = 0
+                  imageItems[++itemIndex] = images
+                }
+                const filename = obj.filename
+                images[imageIndex++] = {
+                  imgFile: 'file://' + testFolder + filename,
+                  filePath: ''
+                }
+              }
+              index++
+            }
+
+            el.imageTable = imageItems
+            console.log('imageitem' + imageItems)
+          })
+
+          // storage.get(matches[0], function (error, data) {
+          //   if (error) throw error
+          //   console.log(data)
+          //   el.imgFile = 'file://' + data.file
+          //   el.filePath = data.file
+          // })
+        } else {
+          el.imageTable = []
+        }
+
+        console.log(data)
+      })
+    },
     handleKeyDown: function (event) {
       console.log('oooo')
       // this.$store.dispatch('ConfirmPage/changeImgUrl', { imgUrl: 'inputed' })
@@ -56,10 +139,11 @@ export default {
       console.log('Handle enter key' + value)
       const storage = require('electron-json-storage')
       const dataPath = '/Users/zhanguiqi/Dropbox/Images/personal/emotion/data'
-      storage.setDataPath(dataPath)
       const el = this
+      const rowCount = 4
       const path = require('path')
 
+      storage.setDataPath(dataPath)
       if (key === 'Enter') {
         var ext = path.extname(this.filePath)
         if (ext === '.gif') {
@@ -116,14 +200,12 @@ export default {
       //   }
       // })
 
-      const testFolder = '/Users/zhanguiqi/Dropbox/Images/personal/emotion/'
-      const rowCount = 4
       const numKey = (parseInt(key) || -1)
       const electron = this.$electron
       if (event.metaKey && numKey >= 0 && numKey <= 9) {
         // (numKey / rowCount)
         console.log('select image')
-        var quotient = Math.floor(numKey / rowCount)
+        var quotient = Math.floor((numKey - 1) / rowCount)
         var remainder = (numKey - 1) % rowCount
         var obj = this.imageTable[quotient][remainder]
         const str = JSON.stringify(obj, null, 4)
@@ -269,64 +351,6 @@ export default {
             console.log(error)
           })
       } else if (key.length === 1) {
-        storage.getAll(function (error, data) {
-          if (error) throw error
-          var fuzzy = require('fuzzy')
-          var prepareMatchs = []
-          var i = 0
-          for (const key in data) {
-            if (data.hasOwnProperty(key)) {
-              const obj = data[key]
-              prepareMatchs[i++] = key + obj.text + obj.searched.join()
-            }
-          }
-
-          var results = fuzzy.filter(value, prepareMatchs)
-          var matches = results.map(function (el) { return el.string })
-          console.log('matched ' + matches)
-          if (matches.length > 0) {
-            // do something
-
-            var images = []
-            var imageIndex = 0
-            var itemIndex = 0
-            const imageItems = []
-
-            imageItems[itemIndex] = images
-            for (let index = 0; index < matches.length; index++) {
-              if (index % rowCount === 0 && index > 0) {
-                images = []
-                imageIndex = 0
-                imageItems[++itemIndex] = images
-              }
-              const file = matches[index]
-              // el.imgFile = 'file://' + testFolder + file
-              // el.filePath = file
-
-              storage.get(file.substring(0, 32), function (error, data) {
-                if (error) throw error
-                console.log('jsondata' + data)
-                const filename = data.filename
-                images[imageIndex++] = {
-                  imgFile: 'file://' + testFolder + filename,
-                  filePath: file
-                }
-                el.imageTable = imageItems
-              })
-            }
-            console.log('imageitem' + imageItems)
-            // storage.get(matches[0], function (error, data) {
-            //   if (error) throw error
-            //   console.log(data)
-            //   el.imgFile = 'file://' + data.file
-            //   el.filePath = data.file
-            // })
-          } else {
-            el.imageTable = []
-          }
-
-          console.log(data)
-        })
       }
       // const fs = require('fs')
       // fs.readdir(testFolder, (err, files) => {
