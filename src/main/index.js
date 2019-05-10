@@ -45,12 +45,23 @@ function newWindow () {
   mainWindow.loadURL(winURL)
 
   mainWindow.on('closed', () => {
-    mainWindow = null
+    app.hide()
+    // mainWindow = null
   })
 }
 
 function createWindow () {
   mainWindow = getOrCreateMainWindow()
+  globalShortcut.register('cmd+ctrl+w', function () {
+    app.hide()
+  })
+
+  ipcMain.on('hide-app', (event, args) => {
+    console.log('hide app')
+    app.hide()
+    // mainWindow.show()
+  })
+
   globalShortcut.register('cmd+ctrl+l', function () {
     console.log('lo')
     // ipcRenderer.sendSync('synchronous-message', 'ping')
@@ -60,10 +71,10 @@ function createWindow () {
     setTimeout(() => {
       mainWindow.show()
     }, 100)
-    ipcMain.on('page-loaded', (event, args) => {
-      console.log('l-page-loaded')
-      // mainWindow.show()
-    })
+  })
+  ipcMain.on('page-loaded', (event, args) => {
+    console.log('l-page-loaded')
+    // mainWindow.show()
   })
 
   globalShortcut.register('cmd+ctrl+e', function () {
@@ -74,10 +85,10 @@ function createWindow () {
     setTimeout(() => {
       mainWindow.show()
     }, 100)
-    ipcMain.on('page-loaded', (event, args) => {
-      console.log('page-loaded')
-      // mainWindow.show()
-    })
+  })
+  ipcMain.on('page-loaded', (event, args) => {
+    console.log('page-loaded')
+    // mainWindow.show()
   })
 }
 

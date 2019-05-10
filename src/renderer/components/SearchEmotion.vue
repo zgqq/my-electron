@@ -134,13 +134,17 @@ export default {
       console.log('robot js')
       // Type "Hello World" then press enter.
       const robot = require('robotjs')
+      this.$electron.ipcRenderer.send('hide-app')
 
       // Type "Hello World".
       // robot.typeString('Hello World')
-
+      // const app = this.$electron.app
+      // app.hide()
+      // this.$electron.Menu.sendActionToFirstResponder('hide:')
+      // this.$electron.remote.getCurrentWindow().hide()
       // Press enter.
-      robot.keyTap('h', 'command')
-      var delayInMilliseconds = 300 // 1 second
+      // robot.keyTap('h', 'command')
+      var delayInMilliseconds = 50 // 1 second
 
       setTimeout(function () {
         // your code to be executed after 1 second
@@ -295,9 +299,9 @@ export default {
 
                   download(obj.imgFile, localFile, function () {
                     console.log('done')
-                    const image = electron.nativeImage.createFromPath(localFile)
-                    console.log('filepath ' + localFile)
-                    electron.clipboard.writeImage(image)
+                    // const image = electron.nativeImage.createFromPath(localFile)
+                    // console.log('filepath ' + localFile)
+                    // electron.clipboard.writeImage(image)
                   })
                   var storeValue = { text: ocr,
                     searched: [value],
@@ -310,12 +314,13 @@ export default {
                   })
                 }
                 console.log('imgfile ' + obj.imgFile)
-                vue.pasteImageToInput()
                 console.log(response)
               })
               .catch(function (error) {
                 console.log(error)
               })
+            electron.clipboard.writeImage(img)
+            vue.pasteImageToInput()
           })
         } else {
           ext = path.extname(obj.imgFile)
