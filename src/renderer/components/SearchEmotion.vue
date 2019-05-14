@@ -5,7 +5,8 @@
     <input id="input"
            value=""
            @keydown="handleKeyDown"
-           v-on:input="handleChange" />
+           v-on:input="handleChange"
+           placeholder="搜索表情..." />
     <div v-for="(items, index) in imageTable"
          :key="index"
          class="image-list">
@@ -14,8 +15,7 @@
            class="image-item">
         <img v-bind:src="item.imgFile"
              height="190"
-             width="190"
-             alt="哈哈哈" />
+             width="190" />
       </div>
     </div>
   </div>
@@ -55,7 +55,10 @@ export default {
       const dataPath = '/Users/zhanguiqi/Dropbox/Images/personal/emotion/data'
       const el = this
       const testFolder = '/Users/zhanguiqi/Dropbox/Images/personal/emotion/'
-      const rowCount = 4
+      const rowCount = this.rowCount
+      const itemHeight = this.itemHeight
+      const inputHeight = this.inputHeight
+      const windowWidth = this.windowWidth
 
       storage.setDataPath(dataPath)
       storage.getAll(function (error, data) {
@@ -111,9 +114,14 @@ export default {
                 }
               }
               index++
+              if (index >= rowCount * 2) {
+                break
+              }
             }
 
             el.imageTable = imageItems
+            console.log('resize')
+            el.$electron.ipcRenderer.send('resize', windowWidth, inputHeight + imageItems.length * itemHeight)
             console.log('imageitem' + imageItems)
           })
 
@@ -125,6 +133,7 @@ export default {
           // })
         } else {
           el.imageTable = []
+          el.$electron.ipcRenderer.send('resize', windowWidth, inputHeight)
         }
 
         console.log(data)
@@ -161,7 +170,10 @@ export default {
       const storage = require('electron-json-storage')
       const dataPath = '/Users/zhanguiqi/Dropbox/Images/personal/emotion/data'
       const el = this
-      const rowCount = 4
+      const rowCount = this.rowCount
+      const itemHeight = this.itemHeight
+      const inputHeight = this.inputHeight
+      const windowWidth = this.windowWidth
       const path = require('path')
 
       storage.setDataPath(dataPath)
@@ -384,6 +396,7 @@ export default {
               r = patt.exec(response.data)
             }
             el.imageTable = imageItems
+            el.$electron.ipcRenderer.send('resize', windowWidth, inputHeight + imageItems.length * itemHeight)
             console.log(imageItems)
           })
           .catch(function (error) {
@@ -449,7 +462,11 @@ export default {
   data () {
     return {
       imgFile: 'file:///Users/zhanguiqi/Dropbox/Personal/Emoticon/haohao.gif',
-      imageTable: []
+      imageTable: [],
+      rowCount: 3,
+      inputHeight: 50,
+      windowWidth: 600,
+      itemHeight: 210
     }
   }
 }
@@ -485,5 +502,23 @@ export default {
 
 .image-item {
   display: inline;
+  margin: 3px;
+}
+#input {
+  width: 600px;
+  height: 50px;
+  font-size: 22px;
+  border: none;
+  padding-left: 12px;
+}
+
+::placeholder {
+  color: #bdc0c3;
+  font-size: 24px;
+}
+
+textarea:focus,
+input:focus {
+  outline: none;
 }
 </style>

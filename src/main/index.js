@@ -32,28 +32,42 @@ function newWindow () {
    * Initial window options
    */
   mainWindow = new BrowserWindow({
-    height: 463,
+    height: 80,
     useContentSize: true,
-    width: 800,
+    width: 600,
+    center: true,
+    skipTaskbar: true,
     webPreferences: {
       pageVisibility: true,
       backgroundThrottling: false,
       webSecurity: false
-    }
+    },
+    frame: false,
+    toolbar: false
   })
+  mainWindow.setMenuBarVisibility(false)
+  mainWindow.setAutoHideMenuBar(true)
 
   mainWindow.loadURL(winURL)
+  app.dock.hide()
 
-  mainWindow.on('closed', () => {
-    app.hide()
-    // mainWindow = null
-  })
-}
+//   mainWindow.on('close', event => {
+//     console.log(event)
+//     event.preventDefault()
+//     mainWindow.hide()
+//     // app.hide() //     // mainWindow = null
+//   })
+// }
 
 function createWindow () {
   mainWindow = getOrCreateMainWindow()
-  globalShortcut.register('cmd+ctrl+w', function () {
-    app.hide()
+  // globalShortcut.register('cmd+w', function () {
+  //   app.hide()
+  // })
+  ipcMain.on('resize', (event, x, y) => {
+    console.log('resize')
+    mainWindow.setSize(x, y)
+    // mainWindow.show()
   })
 
   ipcMain.on('hide-app', (event, args) => {
