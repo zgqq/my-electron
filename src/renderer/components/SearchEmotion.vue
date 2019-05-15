@@ -160,25 +160,110 @@ export default {
         robot.keyTap('v', 'command')
       }, delayInMilliseconds)
     },
-    handleKeyDown: function (event) {
-      console.log('oooo')
-      // this.$store.dispatch('ConfirmPage/changeImgUrl', { imgUrl: 'inputed' })
-      console.log(event.key)
-      const key = event.key
-      const value = event.target.value
-      console.log('Handle enter key' + value)
+    selectImage: function (value, obj) {
       const storage = require('electron-json-storage')
       const dataPath = '/Users/zhanguiqi/Dropbox/Images/personal/emotion/data'
-      const el = this
-      const rowCount = this.rowCount
-      const itemHeight = this.itemHeight
-      const inputHeight = this.inputHeight
-      const windowWidth = this.windowWidth
       const path = require('path')
 
+      const electron = this.$electron
+      const vue = this
+
       storage.setDataPath(dataPath)
-      if (key === 'Enter') {
-        var ext = path.extname(this.filePath)
+
+      const str = JSON.stringify(obj, null, 4)
+      if (obj.imgFile.startsWith('http')) {
+        console.log('image' + str)
+        var fs = require('fs')
+        var request = require('request')
+        var download = function (uri, filename, callback) {
+          request.head(uri, function (err, res, body) {
+            if (err) throw err
+            console.log('content-type:', res.headers['content-type'])
+            console.log('content-length:', res.headers['content-length'])
+            request(uri).pipe(fs.createWriteStream(filename)).on('close', callback)
+          })
+        }
+
+        const tmpFile = '/tmp/tmp.png'
+        download(obj.imgFile, tmpFile, function () {
+          console.log('tmp img saved')
+          // var dataObj = { url: obj.imgFile }
+          const img = electron.nativeImage.createFromPath(tmpFile)
+          console.log(img.toDataURL())
+          const imageData = img.toDataURL().replace(/^data:([A-Za-z-+/]+);base64,/, '')
+
+          console.log('imageObj' + img)
+          // console.log('imageData' + imageData)
+          var dataObj = { image: imageData }
+
+          const axios = require('axios')
+          const querystring = require('querystring')
+          axios.post('https://aip.baidubce.com/rest/2.0/ocr/v1/general?access_token=24.5981c80f9e65ad0886b5acff6cd87f67.2592000.1558855207.282335-16118581',
+            querystring.stringify(dataObj)
+          )
+            .then(function (response) {
+              const pinyin = require('pinyin')
+              console.log(pinyin('中心,,,_ 为', {
+                style: pinyin.STYLE_NORMAL
+              }))
+              const result = response.data.words_result
+              if (result !== undefined && result.length > 0) {
+                // array empty or does not exist
+                var pinyinStr = ''
+                var words = ''
+                for (let index = 0; index < result.length; index++) {
+                  const line = result[index]
+                  const word = line.words.replace(/[ |,]+/, '_')
+                  const pinyins = pinyin(word, {
+                    style: pinyin.STYLE_NORMAL
+                  })
+                  words += word
+                  for (var i = 0; i < pinyins.length; i++) {
+                    const element = pinyins[i]
+                    pinyinStr += element
+                    if (i !== pinyins.length - 1) {
+                      pinyinStr += '_'
+                    }
+                  }
+                }
+
+                console.log('pinyinStr:' + pinyinStr)
+                var crypto = require('crypto')
+                const md5 = function (text) {
+                  return crypto.createHash('md5').update(text).digest('hex')
+                }
+                var ocr = pinyinStr + '-' + words
+                var imgId = md5(ocr)
+                var filename = imgId + '.png'
+                var localFile = '/Users/zhanguiqi/Dropbox/Images/personal/emotion/' + filename
+
+                download(obj.imgFile, localFile, function () {
+                  console.log('done')
+                  // const image = electron.nativeImage.createFromPath(localFile)
+                  // console.log('filepath ' + localFile)
+                  // electron.clipboard.writeImage(image)
+                })
+                var storeValue = { text: ocr,
+                  searched: [value],
+                  utime: Date.now(),
+                  filename:
+                    filename }
+
+                storage.set(imgId, storeValue, function (error) {
+                  if (error) throw error
+                })
+              }
+              console.log('imgfile ' + obj.imgFile)
+              console.log(response)
+            })
+            .catch(function (error) {
+              console.log(error)
+            })
+          electron.clipboard.writeImage(img)
+          vue.pasteImageToInput()
+        })
+      } else {
+        var ext = path.extname(obj.imgFile)
         if (ext === '.gif') {
           this.$electron.clipboard.writeBuffer(
             'NSFilenamesPboardType',
@@ -194,173 +279,67 @@ export default {
           )
         } else {
           const e = this.$electron
-          const image = this.$electron.nativeImage.createFromPath(this.filePath).resize({ witdh: 120, height: 120 }, 'best')
+          // const filepath = testFolder + obj.filename
+          const filepath = obj.imgFile.replace('file://', '')
+          const image = this.$electron.nativeImage.createFromPath(filepath)
+          console.log('filepath ' + filepath)
           e.clipboard.writeImage(image)
         }
 
+        console.log('copy file ' + ext)
+        vue.pasteImageToInput()
+      }
+    },
+    handleKeyDown: function (event) {
+      console.log('oooo')
+      // this.$store.dispatch('ConfirmPage/changeImgUrl', { imgUrl: 'inputed' })
+      console.log(event.key)
+      const key = event.key
+      const value = event.target.value
+      console.log('Handle enter key' + value)
+      const storage = require('electron-json-storage')
+      const dataPath = '/Users/zhanguiqi/Dropbox/Images/personal/emotion/data'
+      const el = this
+      const rowCount = this.rowCount
+      const itemHeight = this.itemHeight
+      const inputHeight = this.inputHeight
+      const windowWidth = this.windowWidth
+
+      storage.setDataPath(dataPath)
+      if (key === 'Enter') {
+        var obj = this.imageTable[0][0]
+        this.selectImage(value, obj)
+        //       var ext = path.extname(this.filePath)
+        //       if (ext === '.gif') {
+        //         this.$electron.clipboard.writeBuffer(
+        //           'NSFilenamesPboardType',
+        //           Buffer.from(`
+        //   <?xml version="1.0" encoding="UTF-8"?>
+        //   <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        //   <plist version="1.0">
+        //     <array>
+        //       <string>` + this.filePath + `</string>
+        //     </array>
+        //   </plist>
+        // `)
+        //         )
+        //       } else {
+        //         const e = this.$electron
+        //         const image = this.$electron.nativeImage.createFromPath(this.filePath).resize({ witdh: 120, height: 120 }, 'best')
+        //         e.clipboard.writeImage(image)
+        //       }
+
         console.log('copy file')
       }
-      // storage.getAll(function (error, data) {
-      //   if (error) throw error
-
-      //   const str = JSON.stringify(data, null, 4)
-      //   console.log('data ' + str)
-      // })
-
-      // storage.keys(function (error, keys) {
-      //   if (error) throw error
-      //   // var FuzzyMatching = require('fuzzy-matching')
-      //   // var fm = new FuzzyMatching(keys)
-      //   // var matched = fm.get(value)
-
-      //   // console.log(matched)
-      //   // console.log(el)
-      //   // el.imgFile = matched.value
-      //   var fuzzy = require('fuzzy')
-      //   var results = fuzzy.filter(value, keys)
-      //   var matches = results.map(function (el) { return el.string })
-      //   console.log(matches)
-      //   if (matches.length > 0) {
-      //     // do something
-      //     storage.get(matches[0], function (error, data) {
-      //       if (error) throw error
-      //       console.log(data)
-      //       el.imgFile = 'file://' + data.file
-      //       el.filePath = data.file
-      //     })
-      //   } else {
-      //     el.imgFile = ''
-      //   }
-      // })
 
       const numKey = (parseInt(key) || -1)
-      const electron = this.$electron
-      const vue = this
       if (event.metaKey && numKey >= 0 && numKey <= 9) {
         // (numKey / rowCount)
         console.log('select image')
         var quotient = Math.floor((numKey - 1) / rowCount)
         var remainder = (numKey - 1) % rowCount
-        var obj = this.imageTable[quotient][remainder]
-        const str = JSON.stringify(obj, null, 4)
-        if (obj.imgFile.startsWith('http')) {
-          console.log('image' + str)
-          var fs = require('fs')
-          var request = require('request')
-          var download = function (uri, filename, callback) {
-            request.head(uri, function (err, res, body) {
-              if (err) throw err
-              console.log('content-type:', res.headers['content-type'])
-              console.log('content-length:', res.headers['content-length'])
-              request(uri).pipe(fs.createWriteStream(filename)).on('close', callback)
-            })
-          }
-
-          const tmpFile = '/tmp/tmp.png'
-          download(obj.imgFile, tmpFile, function () {
-            console.log('tmp img saved')
-            // var dataObj = { url: obj.imgFile }
-            const img = electron.nativeImage.createFromPath(tmpFile)
-            console.log(img.toDataURL())
-            const imageData = img.toDataURL().replace(/^data:([A-Za-z-+/]+);base64,/, '')
-
-            console.log('imageObj' + img)
-            // console.log('imageData' + imageData)
-            var dataObj = { image: imageData }
-
-            const axios = require('axios')
-            const querystring = require('querystring')
-            axios.post('https://aip.baidubce.com/rest/2.0/ocr/v1/general?access_token=24.5981c80f9e65ad0886b5acff6cd87f67.2592000.1558855207.282335-16118581',
-              querystring.stringify(dataObj)
-            )
-              .then(function (response) {
-                const pinyin = require('pinyin')
-                console.log(pinyin('中心,,,_ 为', {
-                  style: pinyin.STYLE_NORMAL
-                }))
-                const result = response.data.words_result
-                if (result !== undefined && result.length > 0) {
-                  // array empty or does not exist
-                  var pinyinStr = ''
-                  var words = ''
-                  for (let index = 0; index < result.length; index++) {
-                    const line = result[index]
-                    const word = line.words.replace(/[ |,]+/, '_')
-                    const pinyins = pinyin(word, {
-                      style: pinyin.STYLE_NORMAL
-                    })
-                    words += word
-                    for (var i = 0; i < pinyins.length; i++) {
-                      const element = pinyins[i]
-                      pinyinStr += element
-                      if (i !== pinyins.length - 1) {
-                        pinyinStr += '_'
-                      }
-                    }
-                  }
-
-                  console.log('pinyinStr:' + pinyinStr)
-                  var crypto = require('crypto')
-                  const md5 = function (text) {
-                    return crypto.createHash('md5').update(text).digest('hex')
-                  }
-                  var ocr = pinyinStr + '-' + words
-                  var imgId = md5(ocr)
-                  var filename = imgId + '.png'
-                  var localFile = '/Users/zhanguiqi/Dropbox/Images/personal/emotion/' + filename
-
-                  download(obj.imgFile, localFile, function () {
-                    console.log('done')
-                    // const image = electron.nativeImage.createFromPath(localFile)
-                    // console.log('filepath ' + localFile)
-                    // electron.clipboard.writeImage(image)
-                  })
-                  var storeValue = { text: ocr,
-                    searched: [value],
-                    utime: Date.now(),
-                    filename:
-                      filename }
-
-                  storage.set(imgId, storeValue, function (error) {
-                    if (error) throw error
-                  })
-                }
-                console.log('imgfile ' + obj.imgFile)
-                console.log(response)
-              })
-              .catch(function (error) {
-                console.log(error)
-              })
-            electron.clipboard.writeImage(img)
-            vue.pasteImageToInput()
-          })
-        } else {
-          ext = path.extname(obj.imgFile)
-          if (ext === '.gif') {
-            this.$electron.clipboard.writeBuffer(
-              'NSFilenamesPboardType',
-              Buffer.from(`
-    <?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-    <plist version="1.0">
-      <array>
-        <string>` + this.filePath + `</string>
-      </array>
-    </plist>
-  `)
-            )
-          } else {
-            const e = this.$electron
-            // const filepath = testFolder + obj.filename
-            const filepath = obj.imgFile.replace('file://', '')
-            const image = this.$electron.nativeImage.createFromPath(filepath)
-            console.log('filepath ' + filepath)
-            e.clipboard.writeImage(image)
-          }
-
-          console.log('copy file ' + ext)
-          vue.pasteImageToInput()
-        }
+        var selectedImage = this.imageTable[quotient][remainder]
+        this.selectImage(value, selectedImage)
         return
       }
 
@@ -466,35 +445,13 @@ export default {
       rowCount: 3,
       inputHeight: 50,
       windowWidth: 600,
-      itemHeight: 210
+      itemHeight: 215
     }
   }
 }
 </script>
 
 <style scoped>
-.title {
-  color: #888;
-  font-size: 18px;
-  font-weight: initial;
-  letter-spacing: 0.25px;
-  margin-top: 10px;
-}
-
-.items {
-  margin-top: 8px;
-}
-
-.item {
-  display: flex;
-  margin-bottom: 6px;
-}
-
-.item .name {
-  color: #6a6a6a;
-  margin-right: 6px;
-}
-
 .item .value {
   color: #35495e;
   font-weight: bold;
@@ -510,6 +467,11 @@ export default {
   font-size: 22px;
   border: none;
   padding-left: 12px;
+}
+
+.image-list {
+  margin: 3px;
+  margin-top: 0px;
 }
 
 ::placeholder {
