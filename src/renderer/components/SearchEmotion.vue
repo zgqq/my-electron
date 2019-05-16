@@ -23,6 +23,7 @@
 
 <script>
 import fileutil from '../util/file.js'
+import appService from '../service/app.js'
 export default {
   name: 'confirm-page',
   mounted () {
@@ -348,6 +349,11 @@ export default {
         var selectedImage = this.imageTable[quotient][remainder]
         this.selectImage(value, selectedImage)
         return
+      }
+
+      if (key === 'Escape') {
+        console.log('esc')
+        appService.hideApp()
       }
 
       if (event.metaKey && key === 'g') {
