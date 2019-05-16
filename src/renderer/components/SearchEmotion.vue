@@ -22,6 +22,7 @@
 </template>
 
 <script>
+import fileutil from '../util/file.js'
 export default {
   name: 'confirm-page',
   mounted () {
@@ -110,7 +111,7 @@ export default {
                 const filename = obj.filename
                 images[imageIndex++] = {
                   imgFile: 'file://' + testFolder + filename,
-                  filePath: ''
+                  filePath: testFolder + filename
                 }
               }
               index++
@@ -163,7 +164,7 @@ export default {
     selectImage: function (value, obj) {
       const storage = require('electron-json-storage')
       const dataPath = '/Users/zhanguiqi/Dropbox/Images/personal/emotion/data'
-      const path = require('path')
+      // const path = require('path')
 
       const electron = this.$electron
       const vue = this
@@ -263,7 +264,13 @@ export default {
           vue.pasteImageToInput()
         })
       } else {
-        var ext = path.extname(obj.imgFile)
+        var filePath = obj.filePath
+        console.log('obj ' + filePath)
+        var fileType = fileutil.getFileType(filePath)
+        var ext = fileType.ext
+        console.log('fileType' + fileType.ext)
+
+        // var ext = path.extname(obj.imgFile)
         if (ext === '.gif') {
           this.$electron.clipboard.writeBuffer(
             'NSFilenamesPboardType',
