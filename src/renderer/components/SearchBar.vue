@@ -2,8 +2,10 @@
   <div>
     <input id="input"
            value=""
-           @keydown="handleKeyDown"
+           @keydown="handleKeydown"
            @input="handleChange"
+           :width="searchWindow.width+'px'"
+           :height="searchWindow.height+'px'"
            :placeholder="placeholder" />
   </div>
 </template>
@@ -12,12 +14,6 @@ export default {
   name: 'SearchBar',
   props: ['placeholder'],
   computed: {
-    main: function () {
-      return this.$store.state.Counter.main
-    },
-    localFile: function () {
-      return this.$store.state.ConfirmPage.localFile
-    }
   },
   methods: {
     handleChange: function (event) {
@@ -35,8 +31,6 @@ export default {
 
 <style scoped>
 #input {
-  width: 600px;
-  height: 50px;
   font-size: 22px;
   border: none;
   padding-left: 12px;

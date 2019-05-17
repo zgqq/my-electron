@@ -430,9 +430,9 @@ export default {
       imgFile: 'file:///Users/zhanguiqi/Dropbox/Personal/Emoticon/haohao.gif',
       imageTable: [],
       rowCount: 3,
-      inputHeight: 50,
-      windowWidth: 600,
-      itemHeight: 215,
+      inputHeight: 60,
+      windowWidth: 650,
+      itemHeight: 220,
       dataDir: '/Users/zhanguiqi/Dropbox/Images/personal/emotion',
       placeholder: '搜索表情'
     }

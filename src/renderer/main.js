@@ -14,6 +14,18 @@ Vue.config.productionTip = false
 //   console.log('nice')
 // })
 /* eslint-disable no-new */
+
+Vue.mixin({
+  data: function () {
+    return {
+      searchWindow: {
+        height: 60,
+        width: 650
+      }
+    }
+  }
+})
+
 store.dispatch('nice')
 new Vue({
   components: { App },
