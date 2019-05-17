@@ -2,11 +2,14 @@
   <div>
     <!-- <div class="title">Information</div> -->
     <!-- <div class="title">local: {{localFile}}</div> -->
-    <input id="input"
+    <!-- <input id="input"
            value=""
            @keydown="handleKeyDown"
            v-on:input="handleChange"
-           placeholder="搜索表情..." />
+           placeholder="搜索表情..." /> -->
+    <search-bar @keydown="handleKeyDown"
+                @input="handleChange"
+                :placeholder="placeholder" />
     <div v-for="(items, index) in imageTable"
          :key="index"
          class="image-list">
@@ -24,6 +27,7 @@
 <script>
 import { fileutil, crypto } from '../util'
 import { appService, clipboardService } from '../service/app.js'
+import SearchBar from './SearchBar'
 export default {
   name: 'confirm-page',
   mounted () {
@@ -32,6 +36,7 @@ export default {
   beforeUpdate () {
     console.log('before update confirm page')
   },
+  components: { SearchBar },
   updated () {
     console.log('updated confirm')
   },
@@ -50,7 +55,8 @@ export default {
     }
   },
   methods: {
-    handleChange: function (event) {
+    handleChange: function (e) {
+      const event = e.event
       const value = event.target.value
       console.log('Handle  change value' + value)
       const storage = require('electron-json-storage')
@@ -265,7 +271,8 @@ export default {
         vue.pasteImageToInput()
       }
     },
-    handleKeyDown: function (event) {
+    handleKeyDown: function (e) {
+      const event = e.event
       console.log('oooo')
       // this.$store.dispatch('ConfirmPage/changeImgUrl', { imgUrl: 'inputed' })
       console.log(event.key)
@@ -426,7 +433,8 @@ export default {
       inputHeight: 50,
       windowWidth: 600,
       itemHeight: 215,
-      dataDir: '/Users/zhanguiqi/Dropbox/Images/personal/emotion'
+      dataDir: '/Users/zhanguiqi/Dropbox/Images/personal/emotion',
+      placeholder: '搜索表情'
     }
   }
 }
