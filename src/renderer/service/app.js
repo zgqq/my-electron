@@ -3,6 +3,9 @@ import fileutil from '../util/file.js'
 const appService = {
   hideApp () {
     require('electron').ipcRenderer.send('hide-app')
+  },
+  resize (width, height) {
+    require('electron').ipcRenderer.send('resize', width, height)
   }
 }
 const clipboardService = {

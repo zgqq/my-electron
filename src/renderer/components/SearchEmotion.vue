@@ -29,9 +29,9 @@ import { fileutil, crypto } from '../util'
 import { appService, clipboardService } from '../service/app.js'
 import SearchBar from './SearchBar'
 export default {
-  name: 'confirm-page',
+  name: 'SearchEmotion',
   mounted () {
-    console.log('mounted confirm page')
+    appService.resize(this.searchWindow.width, this.searchWindow.height)
   },
   beforeUpdate () {
     console.log('before update confirm page')
@@ -65,8 +65,10 @@ export default {
       const testFolder = '/Users/zhanguiqi/Dropbox/Images/personal/emotion/'
       const rowCount = this.rowCount
       const itemHeight = this.itemHeight
-      const inputHeight = this.inputHeight
-      const windowWidth = this.windowWidth
+      // const inputHeight = this.inputHeight
+      // const windowWidth = this.windowWidth
+      const inputHeight = this.searchWindow.height
+      const windowWidth = this.searchWindow.width
 
       storage.setDataPath(dataPath)
       storage.getAll(function (error, data) {
@@ -284,8 +286,10 @@ export default {
       const el = this
       const rowCount = this.rowCount
       const itemHeight = this.itemHeight
-      const inputHeight = this.inputHeight
-      const windowWidth = this.windowWidth
+      // const inputHeight = this.inputHeight
+      // const windowWidth = this.windowWidth
+      const inputHeight = this.searchWindow.height
+      const windowWidth = this.searchWindow.width
 
       storage.setDataPath(dataPath)
       if (key === 'Enter') {
@@ -430,9 +434,9 @@ export default {
       imgFile: 'file:///Users/zhanguiqi/Dropbox/Personal/Emoticon/haohao.gif',
       imageTable: [],
       rowCount: 3,
-      inputHeight: 60,
-      windowWidth: 650,
-      itemHeight: 220,
+      // inputHeight: this.searchWindow.height,
+      // windowWidth: this.searchWindow.width,
+      itemHeight: 210,
       dataDir: '/Users/zhanguiqi/Dropbox/Images/personal/emotion',
       placeholder: '搜索表情'
     }
@@ -441,21 +445,9 @@ export default {
 </script>
 
 <style scoped>
-.item .value {
-  color: #35495e;
-  font-weight: bold;
-}
-
 .image-item {
   display: inline;
   margin: 3px;
-}
-#input {
-  width: 600px;
-  height: 50px;
-  font-size: 22px;
-  border: none;
-  padding-left: 12px;
 }
 
 .image-list {

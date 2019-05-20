@@ -1,6 +1,9 @@
 <template>
-  <div>
+  <div id="input_area"
+       :width="searchWindow.width+'px'"
+       :height="searchWindow.height+'px'">
     <input id="input"
+           autofocus
            value=""
            @keydown="handleKeydown"
            @input="handleChange"
@@ -34,6 +37,8 @@ export default {
   font-size: 22px;
   border: none;
   padding-left: 12px;
+  margin-bottom: 8px;
+  margin-top: 8px;
 }
 
 ::placeholder {

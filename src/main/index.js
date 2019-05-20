@@ -38,9 +38,10 @@ function newWindow () {
     center: true,
     skipTaskbar: true,
     webPreferences: {
+			devTools: false,
       pageVisibility: true,
       backgroundThrottling: false,
-      webSecurity: false
+			webSecurity: false
     },
     frame: false,
     toolbar: false
