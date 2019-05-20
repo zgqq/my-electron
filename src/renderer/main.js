@@ -14,6 +14,24 @@ Vue.config.productionTip = false
 //   console.log('nice')
 // })
 /* eslint-disable no-new */
+const remote = require('electron').remote
+const app = remote.app
+const home = app.getPath('home')
+
+let config
+try {
+  const fs = require('fs')
+  let rawdata = fs.readFileSync(home + '/leo.json')
+  config = JSON.parse(rawdata)
+  console.log('config' + config)
+} catch (e) {
+  console.log('oh no big error', e)
+  config = {}
+}
+
+if (typeof config.userData === 'undefined') {
+  config.userData = app.getPath('userData')
+}
 
 Vue.mixin({
   data: function () {
@@ -21,7 +39,8 @@ Vue.mixin({
       searchWindow: {
         height: 60,
         width: 650
-      }
+      },
+      appConfig: config
     }
   }
 })

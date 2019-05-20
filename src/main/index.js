@@ -40,7 +40,7 @@ function newWindow () {
     center: true,
     skipTaskbar: true,
     webPreferences: {
-      devTools: false,
+      devTools: true,
       pageVisibility: true,
       backgroundThrottling: false,
       webSecurity: false
@@ -72,6 +72,7 @@ function newWindow () {
 
 function createWindow () {
   mainWindow = getOrCreateMainWindow()
+
   app.dock.hide()
   // globalShortcut.register('cmd+w', function () {
   //   app.hide()

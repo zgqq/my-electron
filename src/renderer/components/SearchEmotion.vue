@@ -52,6 +52,12 @@ export default {
     },
     localFile: function () {
       return this.$store.state.ConfirmPage.localFile
+    },
+    dataDir: function () {
+      return this.appConfig.userData + '/emotion'
+    },
+    cacheDir: function () {
+      return this.appConfig.userData + '/emotion/data'
     }
   },
   methods: {
@@ -60,9 +66,9 @@ export default {
       const value = event.target.value
       console.log('Handle  change value' + value)
       const storage = require('electron-json-storage')
-      const dataPath = '/Users/zhanguiqi/Dropbox/Images/personal/emotion/data'
+      const dataPath = this.cacheDir
       const el = this
-      const testFolder = '/Users/zhanguiqi/Dropbox/Images/personal/emotion/'
+      const testFolder = this.dataDir
       const rowCount = this.rowCount
       const itemHeight = this.itemHeight
       // const inputHeight = this.inputHeight
@@ -119,7 +125,7 @@ export default {
                 }
                 const filename = obj.filename
                 images[imageIndex++] = {
-                  imgFile: 'file://' + testFolder + filename,
+                  imgFile: 'file://' + testFolder + '/' + filename,
                   filePath: testFolder + filename
                 }
               }
@@ -172,7 +178,7 @@ export default {
     },
     saveImage: function (imgId, imgFile, localFile, ocr, value, filename) {
       const storage = require('electron-json-storage')
-      const dataPath = '/Users/zhanguiqi/Dropbox/Images/personal/emotion/data'
+      const dataPath = this.dataDir + '/data'
       storage.setDataPath(dataPath)
       fileutil.downloadImg(imgFile, localFile, function () {
         console.log('done')
@@ -251,7 +257,7 @@ export default {
                   var ocr = pinyinStr + '-' + words
                   var imgId = crypto.md5(ocr)
                   var filename = imgId + '.png'
-                  var localFile = dataDir + filename
+                  var localFile = dataDir + '/' + filename
                   vue.saveImage(imgId, obj.imgFile, localFile, ocr, value, filename)
                 }
                 console.log('imgfile ' + obj.imgFile)
@@ -282,7 +288,7 @@ export default {
       const value = event.target.value
       console.log('Handle enter key' + value)
       const storage = require('electron-json-storage')
-      const dataPath = this.dataDir + '/data'
+      const dataPath = this.cacheDir
       const el = this
       const rowCount = this.rowCount
       const itemHeight = this.itemHeight
@@ -373,6 +379,7 @@ export default {
             console.log(error)
           })
       } else if (key.length === 1) {
+
       }
       // const fs = require('fs')
       // fs.readdir(testFolder, (err, files) => {
@@ -437,7 +444,7 @@ export default {
       // inputHeight: this.searchWindow.height,
       // windowWidth: this.searchWindow.width,
       itemHeight: 210,
-      dataDir: '/Users/zhanguiqi/Dropbox/Images/personal/emotion',
+      // dataDir: '/Users/zhanguiqi/Dropbox/Images/personal/emotion',
       placeholder: '搜索表情'
     }
   }
