@@ -14,6 +14,8 @@ if (process.env.NODE_ENV !== 'development') {
 }
 
 let mainWindow
+const isDev = process.env.NODE_ENV === 'development'
+
 const winURL =
   process.env.NODE_ENV === 'development'
     ? `http://localhost:9080`
@@ -32,16 +34,16 @@ function newWindow () {
    * Initial window options
    */
   mainWindow = new BrowserWindow({
-    height: 80,
+    height: 60,
     useContentSize: true,
-    width: 600,
+    width: 650,
     center: true,
     skipTaskbar: true,
     webPreferences: {
-			devTools: false,
+      devTools: false,
       pageVisibility: true,
       backgroundThrottling: false,
-			webSecurity: false
+      webSecurity: false
     },
     frame: false,
     toolbar: false
@@ -50,7 +52,15 @@ function newWindow () {
   mainWindow.setAutoHideMenuBar(true)
 
   mainWindow.loadURL(winURL)
-  app.dock.hide()
+
+  mainWindow.on('close', event => {
+    console.log(event)
+    if (!isDev) {
+      event.preventDefault()
+      mainWindow.hide()
+    }
+  })
+}
 
 //   mainWindow.on('close', event => {
 //     console.log(event)
@@ -62,6 +72,7 @@ function newWindow () {
 
 function createWindow () {
   mainWindow = getOrCreateMainWindow()
+  app.dock.hide()
   // globalShortcut.register('cmd+w', function () {
   //   app.hide()
   // })
@@ -71,24 +82,9 @@ function createWindow () {
     // mainWindow.show()
   })
 
-}
-
-app.on('ready', createWindow)
-
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
-})
-
-app.on('activate', () => {
-  if (mainWindow === null) {
-    createWindow()
-  }
-})
-
   ipcMain.on('hide-app', (event, args) => {
     console.log('hide app')
+    mainWindow.hide()
     app.hide()
     // mainWindow.show()
   })
@@ -121,6 +117,21 @@ app.on('activate', () => {
     console.log('page-loaded')
     // mainWindow.show()
   })
+}
+
+app.on('ready', createWindow)
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit()
+  }
+})
+
+app.on('activate', () => {
+  if (mainWindow === null) {
+    createWindow()
+  }
+})
 
 /**
  * Auto Updater
