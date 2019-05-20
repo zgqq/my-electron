@@ -180,7 +180,7 @@ export default {
       const storage = require('electron-json-storage')
       const dataPath = this.dataDir + '/data'
       storage.setDataPath(dataPath)
-      fileutil.downloadImg(imgFile, localFile, function () {
+      fileutil.downloadImage(imgFile, localFile, function () {
         console.log('done')
       })
       var storeValue = { text: ocr,
@@ -263,6 +263,7 @@ export default {
                 console.log('imgfile ' + obj.imgFile)
                 console.log(response)
               })
+
               .catch(function (error) {
                 console.log(error)
               })
