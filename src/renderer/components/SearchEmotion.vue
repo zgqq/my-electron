@@ -126,7 +126,7 @@ export default {
                 const filename = obj.filename
                 images[imageIndex++] = {
                   imgFile: 'file://' + testFolder + '/' + filename,
-                  filePath: testFolder + filename
+                  filePath: testFolder + '/' + filename
                 }
               }
               index++

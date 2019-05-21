@@ -16,9 +16,9 @@ export default new Router({
       component: require('@/components/SearchEmotion').default
     },
     {
-      path: '/search-emotion',
-      name: 'search-emotion',
-      component: require('@/components/SearchEmotion').default
+      path: '/help',
+      name: 'help-page',
+      component: require('@/components/HelpPage').default
     },
     {
       path: '*',
