@@ -9,7 +9,8 @@
            placeholder="搜索表情..." /> -->
     <search-bar @keydown="handleKeyDown"
                 @input="handleChange"
-                :placeholder="placeholder" />
+                :placeholder="placeholder"
+                v-bind:help-table="helpTable" />
     <div v-for="(items, index) in imageTable"
          :key="index"
          class="image-list">
@@ -341,17 +342,27 @@ export default {
         appService.hideApp()
       }
 
+      let search = false
+      let queryUrl
+      let patt
+
       if (event.metaKey && key === 'g') {
-        console.log('local no Pictures')
-        const axios = require('axios')
-        const queryUrl = 'https://image.baidu.com/search/index?tn=baiduimage&ipn=r&ct=201326592&cl=2&lm=-1&st=-1&fm=result&fr=' +
+        queryUrl = 'https://pic.sogou.com/pics?query=' + value + ' 表情包&di=2&_asf=pic.sogou.com&w=05009900&sut=9393&sst0=1556705686429'
+        search = true
+      } else if (event.metaKey && key === 'b') {
+        queryUrl = 'https://image.baidu.com/search/index?tn=baiduimage&ipn=r&ct=201326592&cl=2&lm=-1&st=-1&fm=result&fr=' +
           '&sf=1&fmq=1556729374609_R&pv=&ic=&nc=1&z=&hd=&latest=&copyright=&se=1&showtab=0&fb=0&width=&height=&face=0' +
           '&istype=2&ie=utf-8&ctd=1556729374611%5E00_617X698&sid=&word=' + value + ' 表情包'
-        // sougou 'https://pic.sogou.com/pics?query=' + value + ' 表情包&di=2&_asf=pic.sogou.com&w=05009900&sut=9393&sst0=1556705686429'
+        patt = /"thumbURL":"(.+?)"/g
+        search = true
+      }
+
+      if (search) {
+        console.log('local no Pictures')
+        const axios = require('axios')
 
         axios.get(queryUrl)
           .then(function (response) {
-            const patt = /"thumbURL":"(.+?)"/g
             var r = patt.exec(response.data)
             var i = 0
             var images = []
@@ -446,7 +457,8 @@ export default {
       // windowWidth: this.searchWindow.width,
       itemHeight: 210,
       // dataDir: '/Users/zhanguiqi/Dropbox/Images/personal/emotion',
-      placeholder: '搜索表情'
+      placeholder: '搜索表情',
+      helpTable: [['cmd+1选择第一张', 'cmd+2选择第二张']]
     }
   }
 }

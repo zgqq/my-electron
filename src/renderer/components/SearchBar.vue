@@ -13,9 +13,11 @@
   </div>
 </template>
 <script>
+import Help from './mixins/help.js'
 export default {
   name: 'SearchBar',
-  props: ['placeholder'],
+  props: ['placeholder', 'helpTable'],
+  mixins: [Help],
   computed: {
   },
   methods: {
@@ -23,7 +25,13 @@ export default {
       this.$emit('input', { event: event })
     },
     handleKeydown: function (event) {
-      this.$emit('keydown', { event: event })
+      if (event.metaKey && event.key === '/') {
+        console.log('placeholder' + this.placeholder)
+        console.log('helpTable' + this.helpTable)
+        this.enterHelp(this.helpTable)
+      } else {
+        this.$emit('keydown', { event: event })
+      }
     }
   },
   data: {
