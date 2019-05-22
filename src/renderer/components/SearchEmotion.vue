@@ -28,6 +28,7 @@
 <script>
 import { fileutil, crypto } from '../util'
 import { appService, clipboardService } from '../service/app.js'
+import { imageService } from '../service/searcher.js'
 import SearchBar from './SearchBar'
 export default {
   name: 'SearchEmotion',
@@ -291,7 +292,6 @@ export default {
       console.log('Handle enter key' + value)
       const storage = require('electron-json-storage')
       const dataPath = this.cacheDir
-      const el = this
       const rowCount = this.rowCount
       const itemHeight = this.itemHeight
       // const inputHeight = this.inputHeight
@@ -343,56 +343,74 @@ export default {
       }
 
       let search = false
-      let queryUrl
-      let patt
-
+      let type = ''
       if (event.metaKey && key === 'g') {
-        queryUrl = 'https://pic.sogou.com/pics?query=' + value + ' 表情包&di=2&_asf=pic.sogou.com&w=05009900&sut=9393&sst0=1556705686429'
         search = true
+        type = 'sogou'
       } else if (event.metaKey && key === 'b') {
-        queryUrl = 'https://image.baidu.com/search/index?tn=baiduimage&ipn=r&ct=201326592&cl=2&lm=-1&st=-1&fm=result&fr=' +
-          '&sf=1&fmq=1556729374609_R&pv=&ic=&nc=1&z=&hd=&latest=&copyright=&se=1&showtab=0&fb=0&width=&height=&face=0' +
-          '&istype=2&ie=utf-8&ctd=1556729374611%5E00_617X698&sid=&word=' + value + ' 表情包'
-        patt = /"thumbURL":"(.+?)"/g
         search = true
+        type = 'baidu'
       }
-
       if (search) {
-        console.log('local no Pictures')
-        const axios = require('axios')
-
-        axios.get(queryUrl)
-          .then(function (response) {
-            var r = patt.exec(response.data)
-            var i = 0
-            var images = []
-            var imageIndex = 0
-            var itemIndex = 0
-            const imageItems = []
-
-            imageItems[itemIndex] = images
-            while (r) {
-              if (i % rowCount === 0 && i > 0) {
-                images = []
-                imageIndex = 0
-                imageItems[++itemIndex] = images
-              }
-              images[imageIndex++] = { imgFile: r[1], filePath: '' }
-              console.log('image url ' + r[1])
-              i++
-              if (i >= rowCount * 2) break
-              r = patt.exec(response.data)
-            }
-            el.imageTable = imageItems
-            el.$electron.ipcRenderer.send('resize', windowWidth, inputHeight + imageItems.length * itemHeight)
-            console.log(imageItems)
-          })
-          .catch(function (error) {
-            console.log(error)
-          })
-      } else if (key.length === 1) {
-
+        imageService.search(value, (imageItems) => {
+          console.log('table' + imageItems.length)
+          this.imageTable = imageItems
+          this.$electron.ipcRenderer.send('resize', windowWidth, inputHeight + imageItems.length * itemHeight)
+        }, type)
       }
+
+      // let search = false
+      // let queryUrl
+      // let patt
+
+      // if (event.metaKey && key === 'g') {
+      //   queryUrl = 'https://pic.sogou.com/pics?query=' + value + ' 表情包&di=2&_asf=pic.sogou.com&w=05009900&sut=9393&sst0=1556705686429'
+      //   patt = /"thumbUrl":"(.+?)"/g
+      //   search = true
+      // } else if (event.metaKey && key === 'b') {
+      //   queryUrl = 'https://image.baidu.com/search/index?tn=baiduimage&ipn=r&ct=201326592&cl=2&lm=-1&st=-1&fm=result&fr=' +
+      //     '&sf=1&fmq=1556729374609_R&pv=&ic=&nc=1&z=&hd=&latest=&copyright=&se=1&showtab=0&fb=0&width=&height=&face=0' +
+      //     '&istype=2&ie=utf-8&ctd=1556729374611%5E00_617X698&sid=&word=' + value + ' 表情包'
+      //   patt = /"thumbURL":"(.+?)"/g
+      //   search = true
+      // }
+
+      // if (search) {
+      //   console.log('local no Pictures')
+      //   const axios = require('axios')
+
+      //   axios.get(queryUrl)
+      //     .then(function (response) {
+      //       var r = patt.exec(response.data)
+      //       var i = 0
+      //       var images = []
+      //       var imageIndex = 0
+      //       var itemIndex = 0
+      //       const imageItems = []
+
+      //       imageItems[itemIndex] = images
+      //       while (r) {
+      //         if (i % rowCount === 0 && i > 0) {
+      //           images = []
+      //           imageIndex = 0
+      //           imageItems[++itemIndex] = images
+      //         }
+      //         images[imageIndex++] = { imgFile: r[1], filePath: '' }
+      //         console.log('image url ' + r[1])
+      //         i++
+      //         if (i >= rowCount * 2) break
+      //         r = patt.exec(response.data)
+      //       }
+      //       el.imageTable = imageItems
+      //       el.$electron.ipcRenderer.send('resize', windowWidth, inputHeight + imageItems.length * itemHeight)
+      //       console.log(imageItems)
+      //     })
+      //     .catch(function (error) {
+      //       console.log(error)
+      //     })
+      // } else if (key.length === 1) {
+
+      // }
       // const fs = require('fs')
       // fs.readdir(testFolder, (err, files) => {
       //   if (err) throw err
