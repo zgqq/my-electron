@@ -67,11 +67,15 @@ const imageService = {
           console.log(error)
         })
     } else {
+      let offset = this.lastImgIndex + 1
+      if (offset >= this.lastImgList.length) {
+        offset = 0
+      }
       let result = this.fetchImage(
         this.lastImgList,
         columnCount,
         rowCount,
-        this.lastImgIndex + 1
+        offset
       )
       this.lastImgIndex = result.endIndex
       callback(result.imageItems)
