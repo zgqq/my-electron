@@ -4,6 +4,7 @@ import axios from 'axios'
 import App from './App'
 import router from './router'
 import store from './store'
+import { appService, clipboardService } from './service/app.js'
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
 Vue.http = Vue.prototype.$http = axios
@@ -40,12 +41,13 @@ Vue.mixin({
         height: 60,
         width: 650
       },
-      appConfig: config
+      appConfig: config,
+      appService: appService,
+      clipboardService: clipboardService
     }
   }
 })
 
-store.dispatch('nice')
 new Vue({
   components: { App },
   router,

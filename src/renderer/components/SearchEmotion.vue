@@ -26,14 +26,13 @@
 </template>
 
 <script>
-import { fileutil, crypto } from '../util'
-import { appService, clipboardService } from '../service/app.js'
+import { fileUtil, crypto, stringUtil } from '../util'
 import { imageService } from '../service/searcher.js'
 import SearchBar from './SearchBar'
 export default {
   name: 'SearchEmotion',
   mounted () {
-    appService.resize(this.searchWindow.width, this.searchWindow.height)
+    this.appService.resize(this.searchWindow.width, this.searchWindow.height)
   },
   beforeUpdate () {
     console.log('before update confirm page')
@@ -182,11 +181,16 @@ export default {
       const storage = require('electron-json-storage')
       const dataPath = this.dataDir + '/data'
       storage.setDataPath(dataPath)
-      fileutil.downloadImage(imgFile, localFile, function () {
+      fileUtil.downloadImage(imgFile, localFile, function () {
         console.log('done')
       })
+      let searchedValue = [value]
+      let pinyin = stringUtil.toPinyinString(value)
+      if (pinyin !== value) {
+        searchedValue[1] = pinyin
+      }
       var storeValue = { text: ocr,
-        searched: [value],
+        searched: searchedValue,
         utime: Date.now(),
         filename:
           filename }
@@ -206,10 +210,10 @@ export default {
       if (obj.imgFile.startsWith('http')) {
         console.log('image' + str)
         const tmpFile = '/tmp/tmp.png'
-        fileutil.downloadImage(obj.imgFile, tmpFile, function () {
+        fileUtil.downloadImage(obj.imgFile, tmpFile, () => {
           console.log('tmp img saved')
           // var dataObj = { url: obj.imgFile }
-          if (fileutil.isGif(tmpFile)) {
+          if (fileUtil.isGif(tmpFile)) {
             var ocr = ''
             var imgId = crypto.md5(value)
             var filename = imgId + '.gif'
@@ -271,12 +275,12 @@ export default {
               })
           }
           // electron.clipboard.writeImage(img)
-          clipboardService.writeImage(tmpFile)
+          this.clipboardService.writeImage(tmpFile)
           vue.pasteImageToInput()
         })
       } else {
         var filePath = obj.filePath
-        clipboardService.writeImage(filePath)
+        this.clipboardService.writeImage(filePath)
         console.log('obj ' + filePath)
         // console.log('copy file ' + ext)
         vue.pasteImageToInput()
@@ -339,7 +343,7 @@ export default {
 
       if (key === 'Escape') {
         console.log('esc')
-        appService.hideApp()
+        this.appService.hideApp()
       }
 
       let search = false
