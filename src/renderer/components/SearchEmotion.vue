@@ -31,6 +31,11 @@ import { imageService } from '../service/searcher.js'
 import SearchBar from './SearchBar'
 export default {
   name: 'SearchEmotion',
+  created () {
+    setInterval(() => {
+      console.log('interval')
+    }, 1000)
+  },
   mounted () {
     this.appService.resize(this.searchWindow.width, this.searchWindow.height)
   },
